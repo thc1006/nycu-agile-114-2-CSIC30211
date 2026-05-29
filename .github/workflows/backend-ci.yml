@@ -1,28 +1,38 @@
 name: Backend CI
 
 # 在 PR 進 main、以及 push 到 main / backend 時觸發。
-# 注意:目前後端程式碼位於 `backend` 分支;當某個 ref 沒有後端程式碼
-# (例如純文件分支)時,測試步驟會優雅跳過,不會產生誤導性的失敗。
+# 後端程式碼目前位於 `backend` 分支;沒有後端程式碼的 ref(例如純文件分支)
+# 會在 detect 步驟優雅跳過,維持綠燈,待 code 併入後自動生效。
 on:
   push:
     branches: [main, backend]
   pull_request:
     branches: [main]
 
+# 同一分支/ PR 有新 push 時,取消仍在跑的舊 run,省 CI 分鐘數。
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# 最小權限原則:本 workflow 只需讀取程式碼。
+permissions:
+  contents: read
+
 jobs:
   test:
     name: pytest (FastAPI + Redis)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     services:
       redis:
-        image: redis:7
+        image: redis:7-alpine          # alpine 體積小、拉取快
         ports:
           - 6379:6379
         options: >-
           --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
+          --health-interval 5s
+          --health-timeout 3s
           --health-retries 5
 
     steps:
@@ -43,13 +53,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: pip
+
+      # uv 取代 pip:安裝快 10–100x,並快取依賴。
+      - name: Set up uv (fast installer + cache)
+        if: steps.detect.outputs.has_backend == 'true'
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: requirements.txt
 
       - name: Install dependencies
         if: steps.detect.outputs.has_backend == 'true'
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
+        run: uv pip install --system -r requirements.txt
 
       - name: Run tests
         if: steps.detect.outputs.has_backend == 'true'
