@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "CampusEats · 入口 (web)",
+  "entry": "campuseats-web-entry.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-05-29T12:07:00.265Z",
+  "updatedAt": "2026-05-29T12:07:00.355Z",
+  "sourceSkillId": "agent-browser",
+  "designSystemId": "uber",
+  "metadata": {
+    "identifier": "campuseats-web-entry",
+    "artifactType": "text/html",
+    "inferred": false
+  }
+}

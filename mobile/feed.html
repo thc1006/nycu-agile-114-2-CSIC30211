@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- role gate: this is the帶餐者 home; orderers are bounced to their own home -->
+<script>(function(){try{var u=new URLSearchParams(location.search).get("role");var r=u||localStorage.getItem("campuseats.role")||"orderer";if(u){try{localStorage.setItem("campuseats.role",u);}catch(e){}}if(r!=="runner")location.replace("dashboard.html?role=orderer");}catch(e){}})();</script>
+<title>接單 · CampusEats</title>
+<link rel="stylesheet" href="css/campus.css" />
+<style>
+  /* online / offline status — white bordered card matching the訂餐者 home,
+     with an explicit 上線/下線 segmented switch so both states are switchable */
+  .status {
+    background:var(--surface); border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg); padding:var(--space-5);
+    display:flex; align-items:center; gap:var(--space-4);
+  }
+  .status__dot { width:10px; height:10px; border-radius:50%; flex:0 0 auto; background:var(--meta); transition:background var(--motion-fast), box-shadow var(--motion-fast); }
+  .status.is-online .status__dot { background:var(--success); box-shadow:0 0 0 4px color-mix(in srgb,var(--success) 25%,transparent); }
+  .status__txt { flex:1; min-width:0; }
+  .status__txt strong { display:block; font-size:var(--text-lg); letter-spacing:-0.01em; }
+  .status__txt span { font-size:var(--text-sm); color:var(--muted); }
+  /* segmented 上線 / 下線 switch */
+  .status-switch { flex:0 0 auto; display:flex; gap:2px; padding:3px; background:var(--surface-warm); border-radius:999px; }
+  .status-switch__opt {
+    border:none; background:transparent; color:var(--muted);
+    font-size:var(--text-sm); font-weight:600; white-space:nowrap;
+    padding:7px 14px; border-radius:999px;
+    transition:background var(--motion-fast) var(--ease-standard), color var(--motion-fast);
+  }
+  .status-switch__opt[aria-pressed="true"] { background:var(--fg); color:var(--bg); }
+  /* earnings — Uber Driver earnings-forward: big centered hero + supporting stats */
+  .earn-hero { text-align:center; padding:var(--space-3) 0 var(--space-5); }
+  .earn-hero .amt {
+    font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+    font-size:clamp(48px,16vw,64px); line-height:1; font-weight:700; letter-spacing:-0.03em;
+  }
+  .earn-hero .cap { font-size:var(--text-sm); color:var(--muted); margin-top:var(--space-2); }
+  .earn-split { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--border-soft); }
+  .earn-split > div { text-align:center; padding:var(--space-4) 0 var(--space-1); }
+  .earn-split > div + div { border-left:1px solid var(--border-soft); }
+  .earn-split .n { font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:var(--text-2xl); font-weight:700; letter-spacing:-0.02em; }
+  .earn-split .l { font-size:var(--text-xs); color:var(--muted); margin-top:2px; }
+  .feed-head { padding:0; }
+  .feed-head .chip-row { padding:var(--space-1) 0 var(--space-3); }
+  .count { font-size:var(--text-sm); color:var(--muted); padding:0 0 var(--space-3); }
+  [hidden] { display:none !important; }
+
+  /* ── full-screen keyword search (Uber Eats search-layer pattern) ───────── */
+  .search-layer {
+    position:fixed; inset:0; z-index:60; background:var(--bg);
+    display:flex; flex-direction:column;
+    opacity:0; visibility:hidden; transform:translateY(8px);
+    transition:opacity var(--motion-fast) var(--ease-standard),
+               transform var(--motion-fast) var(--ease-standard),
+               visibility var(--motion-fast);
+  }
+  .search-layer.is-open { opacity:1; visibility:visible; transform:none; }
+  .search-bar {
+    display:flex; align-items:center; gap:var(--space-3);
+    padding:var(--space-3) var(--space-4);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .search-field {
+    flex:1; min-width:0; display:flex; align-items:center; gap:var(--space-2);
+    background:var(--surface-warm); border-radius:999px; padding:0 var(--space-4);
+    height:44px;
+  }
+  .search-field svg { width:18px; height:18px; flex:0 0 auto; stroke:var(--muted); stroke-width:2; fill:none; }
+  .search-field input {
+    flex:1; min-width:0; border:none; background:transparent; outline:none;
+    font-family:var(--font-body); font-size:var(--text-base); color:var(--fg);
+  }
+  .search-field input::placeholder { color:var(--meta); }
+  /* suppress the browser's native type=search clear button — we render our own .clr */
+  .search-field input::-webkit-search-cancel-button,
+  .search-field input::-webkit-search-decoration { -webkit-appearance:none; appearance:none; display:none; }
+  .search-field .clr { border:none; background:transparent; padding:4px; cursor:pointer; display:none; }
+  .search-field .clr svg { stroke:var(--muted); }
+  .search-field.has-text .clr { display:inline-flex; }
+  .search-cancel {
+    border:none; background:transparent; color:var(--fg); flex:0 0 auto;
+    font-family:var(--font-body); font-size:var(--text-base); font-weight:600;
+    padding:8px 4px; cursor:pointer; white-space:nowrap;
+  }
+  .search-body { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:var(--space-4); }
+  .search-sec + .search-sec { margin-top:var(--space-6); }
+  .search-sec__head { display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3); }
+  .search-sec__head .meta { font-size:var(--text-sm); color:var(--muted); }
+  .search-sec__head .clear-recent { border:none; background:transparent; color:var(--muted); font-size:var(--text-sm); font-weight:600; cursor:pointer; padding:2px; }
+  .kw-row { display:flex; flex-wrap:wrap; gap:var(--space-2); }
+  .kw {
+    border:1px solid var(--border-soft); background:var(--surface); color:var(--fg);
+    border-radius:999px; padding:8px 14px; font-size:var(--text-sm); font-weight:600;
+    cursor:pointer; transition:background var(--motion-fast);
+  }
+  .kw:hover { background:var(--surface-warm); }
+  .recent-row { display:flex; align-items:center; gap:var(--space-3); width:100%;
+    border:none; background:transparent; padding:10px 2px; cursor:pointer; text-align:left;
+    border-bottom:1px solid var(--border-soft); }
+  .recent-row svg { width:16px; height:16px; flex:0 0 auto; stroke:var(--meta); stroke-width:2; fill:none; }
+  .recent-row span { flex:1; min-width:0; font-size:var(--text-base); color:var(--fg); }
+  .recent-row .go { stroke:var(--meta); transform:rotate(-45deg); }
+  .search-results .count { padding:0 0 var(--space-3); }
+  .search-empty { text-align:center; padding:var(--space-12) var(--space-4); }
+  .search-empty h3 { font-family:var(--font-display); font-size:var(--text-xl); margin-bottom:var(--space-2); }
+  .search-empty p { font-size:var(--text-sm); color:var(--muted); margin-bottom:var(--space-5); }
+  mark { background:color-mix(in srgb, var(--fg) 14%, transparent); color:inherit; border-radius:3px; padding:0 1px; }
+</style>
+</head>
+<body>
+<main class="app" data-od-id="feed">
+  <header class="appbar">
+    <div class="appbar__title" style="grid-column:1/3; text-align:left; padding-left:8px; justify-content:flex-start;" data-brand-mark>接單</div>
+    <button class="iconbtn" id="searchBtn" aria-label="搜尋"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></button>
+  </header>
+
+  <div class="appbody">
+    <!-- online / offline (only when online do requests appear, like Uber Driver) -->
+    <div class="status is-online" id="status">
+      <span class="status__dot"></span>
+      <span class="status__txt">
+        <strong id="statusTitle">已上線 · 開始接單</strong>
+        <span id="statusSub">附近的帶餐需求會即時出現在下方</span>
+      </span>
+      <div class="status-switch" id="statusSwitch" role="group" aria-label="上線 / 下線">
+        <button type="button" class="status-switch__opt" data-online="true" aria-pressed="true">上線</button>
+        <button type="button" class="status-switch__opt" data-online="false" aria-pressed="false">下線</button>
+      </div>
+    </div>
+
+    <!-- today's earnings glance (Uber Driver earnings-forward home) -->
+    <div class="card" data-od-id="runner-earnings">
+      <div class="between" style="margin-bottom:var(--space-1);">
+        <span class="meta">今天的帶餐收入</span>
+        <a href="profile.html" class="ro" style="color:var(--muted); font-size:var(--text-sm); font-weight:600;">查看明細</a>
+      </div>
+      <div class="earn-hero">
+        <div class="amt">$60</div>
+        <div class="cap">今日帶餐費</div>
+      </div>
+      <div class="earn-split">
+        <div><div class="n">2</div><div class="l">已完成</div></div>
+        <div><div class="n">4.9</div><div class="l">評分</div></div>
+      </div>
+    </div>
+
+    <!-- nearby requests (hidden while offline) -->
+    <div id="onlineBlock">
+      <div class="feed-head">
+        <div class="chip-row" id="filters" role="tablist" aria-label="篩選">
+          <button class="chip is-active" data-filter="all">全部</button>
+          <button class="chip" data-filter="near">順路</button>
+          <button class="chip" data-filter="canteen">學餐</button>
+          <button class="chip" data-filter="drink">飲料</button>
+          <button class="chip" data-filter="high">報酬高</button>
+        </div>
+      </div>
+      <p class="count"><strong id="countN" class="num">5</strong> 筆待接 · 依取餐截止時間排序</p>
+
+      <div class="list" id="orderList">
+        <a class="card card--link" href="order-detail.html" data-tags="near drink" data-od-id="o1">
+          <div class="order-card__top">
+            <div><div class="order-card__rest">拉亞漢堡 · 蛋餅＋紅茶</div><div class="meta" style="margin-top:4px;">200m · 順路</div></div>
+            <span class="fee">$25<small>/單</small></span>
+          </div>
+          <div class="order-card__meta">
+            <div class="order-line"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>工學院 3F 走廊</div>
+            <div class="order-line"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>10:40 前 · 還有 18 分鐘</div>
+          </div>
+          <div class="order-card__foot"><span class="tag">1 項餐點</span><span class="meta">CE-2051</span></div>
+        </a>
+
+        <a class="card card--link" href="order-detail.html" data-tags="near canteen high" data-od-id="o2">
+          <div class="order-card__top">
+            <div><div class="order-card__rest">研三舍餐廳 · 滷肉飯＋貢丸湯</div><div class="meta" style="margin-top:4px;">同棟 · 不繞路</div></div>
+            <span class="fee">$30<small>/單</small></span>
+          </div>
+          <div class="order-card__meta">
+            <div class="order-line"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>第二教學大樓 2F</div>
+            <div class="order-line"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>12:15 前 · 尖峰時段</div>
+          </div>
+          <div class="order-card__foot"><span class="tag">2 項餐點</span><span class="meta">CE-2052</span></div>
+        </a>
+
+        <a class="card card--link" href="order-detail.html" data-tags="drink high" data-od-id="o3">
+          <div class="order-card__top">
+            <div><div class="order-card__rest">茶壜 · 微糖少冰珍奶 ×2</div><div class="meta" style="margin-top:4px;">450m · 校門口</div></div>
+            <span class="fee">$35<small>/單</small></span>
+          </div>
+          <div class="order-card__meta">
+            <div class="order-line"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>綜合大樓 5F 實驗室</div>
+            <div class="order-line"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>14:00 前 · 較寬鬆</div>
+          </div>
+          <div class="order-card__foot"><span class="tag">2 杯飲料</span><span class="meta">CE-2053</span></div>
+        </a>
+
+        <a class="card card--link" href="order-detail.html" data-tags="canteen" data-od-id="o4">
+          <div class="order-card__top">
+            <div><div class="order-card__rest">小木屋鬆餅 · 培根蛋鬆餅</div><div class="meta" style="margin-top:4px;">300m</div></div>
+            <span class="fee">$20<small>/單</small></span>
+          </div>
+          <div class="order-card__meta">
+            <div class="order-line"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>學生宿舍 A 棟交誼廳</div>
+            <div class="order-line"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>13:30 前</div>
+          </div>
+          <div class="order-card__foot"><span class="tag">1 項餐點</span><span class="meta">CE-2054</span></div>
+        </a>
+
+        <a class="card card--link" href="order-detail.html" data-tags="near canteen" data-od-id="o5">
+          <div class="order-card__top">
+            <div><div class="order-card__rest">阿嬤的飯桶 · 三菜一肉便當</div><div class="meta" style="margin-top:4px;">150m · 順路</div></div>
+            <span class="fee">$20<small>/單</small></span>
+          </div>
+          <div class="order-card__meta">
+            <div class="order-line"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>圖書館 1F 大廳</div>
+            <div class="order-line"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>12:30 前 · 尖峰時段</div>
+          </div>
+          <div class="order-card__foot"><span class="tag">1 項餐點</span><span class="meta">CE-2055</span></div>
+        </a>
+      </div>
+
+      <div class="empty" id="emptyState" hidden data-od-id="feed-empty">
+        <div class="empty__mark"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></div>
+        <h3>這個篩選目前沒有訂單</h3>
+        <p>試著放寬條件，或回到「全部」看看其他同學的需求。尖峰時段（11:30–13:00）通常最多單。</p>
+        <button class="btn btn-white btn--sm" id="resetFilter">看全部待接</button>
+      </div>
+    </div>
+
+    <!-- offline state -->
+    <div class="empty" id="offlineBlock" hidden data-od-id="feed-offline">
+      <div class="empty__mark"><svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/></svg></div>
+      <h3>你目前離線中</h3>
+      <p>上線後才會收到附近的帶餐需求。準備好順路帶餐了嗎？</p>
+      <button class="btn btn-black btn--sm" id="goOnline">立即上線</button>
+    </div>
+  </div>
+
+  <nav class="tabbar" data-tabbar data-active="home" data-od-id="tabbar"></nav>
+
+  <!-- full-screen keyword search layer -->
+  <div class="search-layer" id="searchLayer" role="dialog" aria-modal="true" aria-label="搜尋待接訂單" data-od-id="search">
+    <div class="search-bar">
+      <div class="search-field" id="searchField">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input id="searchInput" type="search" inputmode="search" autocomplete="off"
+               placeholder="搜尋店家、餐點、地點或單號" aria-label="搜尋關鍵字" />
+        <button class="clr" id="searchClear" type="button" aria-label="清除"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <button class="search-cancel" id="searchCancel" type="button">取消</button>
+    </div>
+    <div class="search-body" id="searchBody">
+      <!-- idle: suggestions + recent (rendered by JS) -->
+      <div id="searchIdle">
+        <div class="search-sec">
+          <div class="search-sec__head"><span class="meta">熱門關鍵字</span></div>
+          <div class="kw-row" id="hotKw">
+            <button class="kw" type="button">飲料</button>
+            <button class="kw" type="button">學餐</button>
+            <button class="kw" type="button">順路</button>
+            <button class="kw" type="button">報酬高</button>
+            <button class="kw" type="button">珍奶</button>
+            <button class="kw" type="button">便當</button>
+          </div>
+        </div>
+        <div class="search-sec" id="recentSec" hidden>
+          <div class="search-sec__head"><span class="meta">最近搜尋</span><button class="clear-recent" id="clearRecent" type="button">清除</button></div>
+          <div id="recentList"></div>
+        </div>
+      </div>
+      <!-- results -->
+      <div class="search-results" id="searchResults" hidden>
+        <p class="count"><strong id="resCount" class="num">0</strong> 筆符合的待接訂單</p>
+        <div class="list" id="resList"></div>
+      </div>
+      <!-- no match -->
+      <div class="search-empty" id="searchEmpty" hidden>
+        <h3 id="searchEmptyTitle">找不到符合的訂單</h3>
+        <p>換個關鍵字，或看看目前全部的待接訂單。</p>
+        <button class="btn btn-black btn--sm" id="searchSeeAll" type="button">看全部待接</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/campus.js"></script>
+<script>
+  CampusEats.guard("runner");
+
+  /* ---- full-screen keyword search ---- */
+  // map category tags → Chinese keyword synonyms so "飲料"/"學餐"/"順路" hit too
+  var TAG_KW = {
+    near:    "順路 不繞路 同棟",
+    canteen: "學餐 學生餐廳 便當 自助餐",
+    drink:   "飲料 手搖 珍奶 珍珠奶茶",
+    high:    "報酬高 高報酬"
+  };
+  // live order cards — defined up here so both search and filters can use them
+  var cards = Array.prototype.slice.call(document.querySelectorAll("#orderList .card"));
+  // build a search index from the live cards (clones keep visual + href/role parity)
+  var index = cards.map(function (card) {
+    var rest = (card.querySelector(".order-card__rest") || {}).textContent || "";
+    var dist = (card.querySelector(".order-card__top .meta") || {}).textContent || "";
+    var loc  = (card.querySelector(".order-line") || {}).textContent || "";
+    var id   = (card.querySelector(".order-card__foot .meta") || {}).textContent || "";
+    var tagKw = (card.dataset.tags || "").split(" ").map(function (t) { return TAG_KW[t] || ""; }).join(" ");
+    var hay = [rest, dist, loc, id, tagKw].join(" ").toLowerCase().replace(/\s+/g, " ");
+    return { card: card, hay: hay };
+  });
+
+  var layer     = document.getElementById("searchLayer");
+  var field     = document.getElementById("searchField");
+  var input     = document.getElementById("searchInput");
+  var clearBtn  = document.getElementById("searchClear");
+  var idleView  = document.getElementById("searchIdle");
+  var resView   = document.getElementById("searchResults");
+  var emptyView = document.getElementById("searchEmpty");
+  var resList   = document.getElementById("resList");
+  var resCount  = document.getElementById("resCount");
+  var emptyTitle= document.getElementById("searchEmptyTitle");
+  var recentSec = document.getElementById("recentSec");
+  var recentList= document.getElementById("recentList");
+  var RECENT_KEY = "campuseats.search.runner";
+
+  function getRecent() {
+    try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch (e) { return []; }
+  }
+  function pushRecent(q) {
+    q = q.trim(); if (!q) return;
+    var list = getRecent().filter(function (x) { return x !== q; });
+    list.unshift(q); list = list.slice(0, 6);
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+  function renderRecent() {
+    var list = getRecent();
+    recentSec.hidden = list.length === 0;
+    recentList.innerHTML = "";
+    list.forEach(function (q) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "recent-row";
+      b.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+        + '<span></span>'
+        + '<svg class="go" viewBox="0 0 24 24" width="16" height="16"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+      b.querySelector("span").textContent = q;
+      b.addEventListener("click", function () { input.value = q; runSearch(); input.focus(); });
+      recentList.appendChild(b);
+    });
+  }
+
+  function openSearch() {
+    renderRecent();
+    layer.classList.add("is-open");
+    document.body.style.overflow = "hidden";
+    setTimeout(function () { input.focus(); }, 60);
+  }
+  function closeSearch() {
+    layer.classList.remove("is-open");
+    document.body.style.overflow = "";
+  }
+
+  function runSearch() {
+    var q = input.value.trim().toLowerCase();
+    field.classList.toggle("has-text", q.length > 0);
+    if (!q) { idleView.hidden = false; resView.hidden = true; emptyView.hidden = true; return; }
+    idleView.hidden = true;
+    var matches = index.filter(function (it) { return it.hay.indexOf(q) > -1; });
+    resList.innerHTML = "";
+    if (matches.length === 0) {
+      resView.hidden = true; emptyView.hidden = false;
+      emptyTitle.textContent = "找不到「" + input.value.trim() + "」的待接訂單";
+      return;
+    }
+    emptyView.hidden = true; resView.hidden = false;
+    resCount.textContent = matches.length;
+    matches.forEach(function (it) {
+      var clone = it.card.cloneNode(true);
+      clone.hidden = false;
+      resList.appendChild(clone);
+    });
+  }
+
+  document.getElementById("searchBtn").addEventListener("click", function () {
+    if (!online) { toast("上線後才有可接訂單可搜尋", { icon: false }); return; }
+    openSearch();
+  });
+  document.getElementById("searchCancel").addEventListener("click", closeSearch);
+  clearBtn.addEventListener("click", function () { input.value = ""; runSearch(); input.focus(); });
+  document.getElementById("searchSeeAll").addEventListener("click", function () { input.value = ""; runSearch(); input.focus(); });
+  document.getElementById("clearRecent").addEventListener("click", function () {
+    try { localStorage.removeItem(RECENT_KEY); } catch (e) {}
+    renderRecent();
+  });
+  Array.prototype.slice.call(document.querySelectorAll("#hotKw .kw")).forEach(function (k) {
+    k.addEventListener("click", function () { input.value = k.textContent; runSearch(); input.focus(); });
+  });
+  input.addEventListener("input", runSearch);
+  input.addEventListener("change", function () { pushRecent(input.value); });
+  // commit to recent on enter / when a result is opened
+  input.addEventListener("keydown", function (e) { if (e.key === "Enter") pushRecent(input.value); });
+  resList.addEventListener("click", function () { pushRecent(input.value); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && layer.classList.contains("is-open")) closeSearch(); });
+
+  /* ---- online / offline ---- */
+  var statusEl = document.getElementById("status");
+  var statusSwitch = document.getElementById("statusSwitch");
+  var switchOpts = Array.prototype.slice.call(statusSwitch.querySelectorAll(".status-switch__opt"));
+  var statusTitle = document.getElementById("statusTitle");
+  var statusSub = document.getElementById("statusSub");
+  var onlineBlock = document.getElementById("onlineBlock");
+  var offlineBlock = document.getElementById("offlineBlock");
+  var online = true;
+
+  function renderStatus() {
+    statusEl.classList.toggle("is-online", online);
+    statusEl.classList.toggle("is-offline", !online);
+    switchOpts.forEach(function (b) {
+      b.setAttribute("aria-pressed", String((b.dataset.online === "true") === online));
+    });
+    statusTitle.textContent = online ? "已上線 · 開始接單" : "已離線";
+    statusSub.textContent = online ? "附近的帶餐需求會即時出現在下方" : "上線後才會看到可接的訂單";
+    onlineBlock.hidden = !online;
+    offlineBlock.hidden = online;
+  }
+  function setOnline(v, announce) {
+    online = v;
+    renderStatus();
+    if (announce) toast(online ? "已上線，開始接收附近訂單" : "已離線，暫停接單");
+  }
+  statusSwitch.addEventListener("click", function (e) {
+    var b = e.target.closest(".status-switch__opt"); if (!b) return;
+    setOnline(b.dataset.online === "true", true);
+  });
+  document.getElementById("goOnline").addEventListener("click", function () { setOnline(true, true); });
+
+  /* ---- filters ---- */
+  var filters = document.getElementById("filters");
+  var countN = document.getElementById("countN");
+  var empty = document.getElementById("emptyState");
+
+  function apply(filter) {
+    var shown = 0;
+    cards.forEach(function (c) {
+      var match = filter === "all" || (c.dataset.tags || "").split(" ").indexOf(filter) > -1;
+      c.hidden = !match;
+      if (match) shown++;
+    });
+    countN.textContent = shown;
+    empty.hidden = shown !== 0;
+    document.getElementById("orderList").hidden = shown === 0;
+  }
+  filters.addEventListener("click", function (e) {
+    var btn = e.target.closest(".chip"); if (!btn) return;
+    filters.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("is-active"); });
+    btn.classList.add("is-active");
+    apply(btn.dataset.filter);
+  });
+  document.getElementById("resetFilter").addEventListener("click", function () {
+    filters.querySelector('[data-filter="all"]').click();
+  });
+
+  renderStatus();
+</script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>登入 · CampusEats</title>
+<link rel="stylesheet" href="css/campus-web.css" />
+<style>
+  .login { min-height: 100dvh; display: grid; grid-template-columns: 1.02fr 1fr; }
+  @media (max-width: 880px) { .login { grid-template-columns: 1fr; } }
+
+  /* left brand panel */
+  .login__brand { background: var(--fg); color: var(--bg); padding: clamp(32px, 5vw, 64px); display: flex; flex-direction: column; }
+  @media (max-width: 880px) { .login__brand { padding-block: var(--space-8); } }
+  .login__brand .topbar__brand { color: var(--bg); font-size: var(--text-xl); }
+  .login__brand h1 { font-size: clamp(28px, 4vw, 44px); line-height: 1.08; letter-spacing: -0.03em; margin-top: auto; max-width: 16ch; }
+  .login__brand p { color: rgba(255,255,255,.7); margin-top: var(--space-4); max-width: 40ch; }
+  .login__loop { display: flex; flex-wrap: wrap; gap: 7px; margin-top: var(--space-6); margin-bottom: auto; }
+  .login__loop span { background: rgba(255,255,255,.12); border-radius: 999px; padding: 6px 12px; font-size: var(--text-xs); font-weight: 600; }
+  @media (max-width: 880px) { .login__brand h1 { margin-top: var(--space-5); } .login__loop { display: none; } }
+
+  /* right form panel */
+  .login__form { display: grid; place-items: center; padding: clamp(32px, 5vw, 64px); }
+  .login__card { width: 100%; max-width: 400px; }
+  .login__card h2 { font-size: var(--text-2xl); letter-spacing: -0.02em; }
+  .login__card .sub { color: var(--muted); font-size: var(--text-sm); margin-top: 6px; margin-bottom: var(--space-6); }
+  .role-pick { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-bottom: var(--space-3); }
+  .role-opt { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; border: 1px solid var(--border-soft); border-radius: var(--radius-md); cursor: pointer; transition: border-color var(--motion-fast), background var(--motion-fast); }
+  .role-opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .role-opt .ic { width: 30px; height: 30px; display: grid; place-items: center; }
+  .role-opt .ic svg { width: 22px; height: 22px; stroke: var(--fg); stroke-width: 2; fill: none; }
+  .role-opt strong { font-size: var(--text-sm); }
+  .role-opt span { font-size: var(--text-xs); color: var(--muted); }
+  .role-opt:has(input:checked) { border-color: var(--fg); background: var(--surface-warm); box-shadow: inset 0 0 0 1px var(--fg); }
+  .role-hint { font-size: var(--text-xs); color: var(--meta); margin-bottom: var(--space-5); line-height: 1.5; }
+  .legal { font-size: var(--text-xs); color: var(--meta); text-align: center; line-height: 1.6; margin-top: var(--space-5); }
+  .legal a { text-decoration: underline; }
+</style>
+</head>
+<body data-od-id="login">
+  <main class="login">
+    <div class="login__brand">
+      <a class="topbar__brand" href="landing.html" data-brand-mark data-no-role>CampusEats</a>
+      <h1>校園帶餐媒合，學生幫學生。</h1>
+      <p>用學校 Email 進入，選擇這次要使用的身份。訂餐者與帶餐者是各自獨立的體驗。</p>
+      <div class="login__loop" aria-hidden="true">
+        <span>登入</span><span>發單</span><span>接單</span><span>狀態更新</span><span>確認收餐</span><span>評價</span>
+      </div>
+    </div>
+
+    <div class="login__form">
+      <div class="login__card">
+        <h2>登入</h2>
+        <p class="sub">用學校 Email 進入，選擇這次要使用的身份。</p>
+
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="email">學校 Email<span class="req">*</span></label>
+            <input class="control" type="email" id="email" name="email" placeholder="you@campus.edu" autocomplete="email" value="student@campus.edu" />
+            <div class="field__error"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>請輸入有效的學校 Email</div>
+          </div>
+          <div class="field">
+            <label for="pw">密碼<span class="req">*</span></label>
+            <input class="control" type="password" id="pw" name="pw" placeholder="輸入密碼" autocomplete="current-password" value="demo1234" />
+            <div class="field__error"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>請輸入密碼</div>
+          </div>
+
+          <label style="font-size:var(--text-sm);font-weight:600;display:block;margin-bottom:8px;">這次要進入哪一種視角？<span class="req">*</span></label>
+          <div class="role-pick" role="radiogroup" aria-label="選擇進入的視角">
+            <label class="role-opt">
+              <input type="radio" name="role" value="orderer" checked />
+              <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h18M6 7v13a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7M9 7V5a3 3 0 0 1 6 0v2"/></svg></span>
+              <strong>訂餐者</strong><span>發單請人帶餐</span>
+            </label>
+            <label class="role-opt">
+              <input type="radio" name="role" value="runner" />
+              <span class="ic"><svg viewBox="0 0 24 24"><path d="M13 3l-2 5h4l-3 8M5 13h4M15 13h4"/><circle cx="6.5" cy="18.5" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/></svg></span>
+              <strong>帶餐者</strong><span>順路接單賺費</span>
+            </label>
+          </div>
+          <p class="role-hint">兩種視角是各自獨立的體驗，登入後只會看到所選身份的畫面。要換到另一種身份，回到這頁重新選擇即可。</p>
+
+          <a href="dashboard.html" id="continueBtn" role="button" class="btn btn-black btn--block btn--lg" data-no-role style="text-decoration:none;">繼續</a>
+        </form>
+
+        <p class="legal">繼續即代表你同意 <a href="#" data-legal>服務條款</a> 與 <a href="#" data-legal>隱私政策</a>。</p>
+      </div>
+    </div>
+  </main>
+
+<script src="js/campus-web.js"></script>
+<script>
+  // preselect the role passed from landing / register (?role=orderer|runner)
+  (function () {
+    var r = new URLSearchParams(location.search).get("role");
+    if (r === "runner" || r === "orderer") {
+      var input = document.querySelector('input[name=role][value="' + r + '"]');
+      if (input) input.checked = true;
+    }
+  })();
+
+  document.querySelectorAll("[data-legal]").forEach(function (a) {
+    a.addEventListener("click", function (e) { e.preventDefault(); toast(a.textContent.trim(), { icon: false }); });
+  });
+
+  var form = document.getElementById("loginForm");
+  var continueBtn = document.getElementById("continueBtn");
+  function currentRole() { var c = form.querySelector("input[name=role]:checked"); return c ? c.value : "orderer"; }
+  function syncHref() { continueBtn.setAttribute("href", CampusEats.home(currentRole())); }
+  form.querySelectorAll("input[name=role]").forEach(function (r) { r.addEventListener("change", syncHref); });
+  syncHref();
+
+  function validate() {
+    var ok = true;
+    [document.getElementById("email"), document.getElementById("pw")].forEach(function (input) {
+      var field = input.closest(".field");
+      var valid = input.value.trim() !== "" && (input.type !== "email" || /.+@.+\..+/.test(input.value));
+      field.classList.toggle("has-error", !valid);
+      if (!valid) ok = false;
+    });
+    return ok;
+  }
+  continueBtn.addEventListener("click", function (e) {
+    if (!validate()) { e.preventDefault(); return; }
+    CampusEats.setRole(currentRole());
+    continueBtn.setAttribute("href", CampusEats.home(currentRole()));
+  });
+  form.addEventListener("submit", function (e) { e.preventDefault(); if (!validate()) return; CampusEats.setRole(currentRole()); continueBtn.click(); });
+</script>
+</body>
+</html>

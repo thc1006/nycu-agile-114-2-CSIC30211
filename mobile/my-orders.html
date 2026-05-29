@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>我的訂單 · CampusEats</title>
+<link rel="stylesheet" href="css/campus.css" />
+<style>
+  .seg-tabs { display:flex; gap:0; border-bottom:1px solid var(--border-soft); padding:0 var(--space-4); }
+  .seg-tabs button { flex:1; padding:14px 0; border:none; background:none; font-weight:600; font-size:var(--text-base); color:var(--meta); position:relative; }
+  .seg-tabs button.is-active { color:var(--fg); }
+  .seg-tabs button.is-active::after { content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:var(--fg); }
+  .ro { font-size:var(--text-xs); color:var(--meta); }
+  [hidden]{display:none !important;}
+</style>
+</head>
+<body>
+<main class="app" data-od-id="my-orders">
+  <header class="appbar">
+    <div class="appbar__title" style="grid-column:1/-1;" id="pageTitle">我的訂單</div>
+  </header>
+
+  <div class="appbody appbody--flush">
+    <div class="seg-tabs" id="tabs">
+      <button class="is-active" data-tab="active">進行中</button>
+      <button data-tab="history">歷史</button>
+    </div>
+
+    <!-- 進行中 -->
+    <div id="paneActive" class="list" style="padding:var(--space-5) var(--space-4) 0;">
+      <!-- orderer: 我發布的 -->
+      <a class="card card--link" href="order-tracking.html" data-owner="orderer" data-od-id="active-1">
+        <div class="order-card__top">
+          <div><div class="order-card__rest">阿嬤的飯桶 · 雞腿便當</div><div class="ro" style="margin-top:4px;">我發布 · CE-2048</div></div>
+          <span class="badge badge--buying">購買中</span>
+        </div>
+        <div class="order-card__foot"><span class="meta">帶餐者 阿翔</span><span class="fee">$20</span></div>
+      </a>
+      <!-- runner: 我接的 -->
+      <a class="card card--link" href="order-tracking.html?role=runner" data-owner="runner" data-od-id="active-2">
+        <div class="order-card__top">
+          <div><div class="order-card__rest">茶壜 · 微糖少冰珍奶 ×2</div><div class="ro" style="margin-top:4px;">我接的 · CE-2053</div></div>
+          <span class="badge badge--matched">已接單</span>
+        </div>
+        <div class="order-card__foot"><span class="meta">訂餐者 阿哲</span><span class="fee">$35</span></div>
+      </a>
+      <div class="empty" id="emptyActive" hidden>
+        <div class="empty__mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h11l3 3v13H6zM9 4v4h7"/></svg></div>
+        <h3 id="emptyActiveTitle">目前沒有進行中的訂單</h3>
+        <p id="emptyActiveSub">發一張帶餐需求，接單後就能在這裡追蹤進度。</p>
+      </div>
+    </div>
+
+    <!-- 歷史 — 每筆都可點，進入完整訂單詳情（含訂餐資訊與雙向評價） -->
+    <div id="paneHistory" class="list" hidden style="padding:var(--space-5) var(--space-4) 0;">
+      <!-- orderer history -->
+      <a class="card card--link" href="history-detail.html?id=CE-2039" data-owner="orderer" data-od-id="hist-1">
+        <div class="order-card__top">
+          <div><div class="order-card__rest">拉亞漢堡 · 蛋餅＋紅茶</div><div class="ro" style="margin-top:4px;">我發布 · 昨天 10:32 · CE-2039</div></div>
+          <span class="badge badge--done">已完成</span>
+        </div>
+        <div class="order-card__foot"><span class="meta">待評價帶餐者</span><span class="fee">$25</span></div>
+      </a>
+      <a class="card card--link" href="history-detail.html?id=CE-2018" data-owner="orderer" data-od-id="hist-3">
+        <div class="order-card__top">
+          <div><div class="order-card__rest">小木屋鬆餅 · 培根蛋鬆餅</div><div class="ro" style="margin-top:4px;">我發布 · 5/27 13:05 · CE-2018</div></div>
+          <span class="badge badge--cancelled">已取消</span>
+        </div>
+        <div class="order-card__foot"><span class="meta">逾時無人接單，已自動取消</span><span class="fee">$20</span></div>
+      </a>
+      <!-- runner history -->
+      <a class="card card--link" href="history-detail.html?id=CE-2031" data-owner="runner" data-od-id="hist-2">
+        <div class="order-card__top">
+          <div><div class="order-card__rest">阿嬤的飯桶 · 三菜一肉便當</div><div class="ro" style="margin-top:4px;">我接的 · 昨天 12:18 · CE-2031</div></div>
+          <span class="badge badge--done">已完成</span>
+        </div>
+        <div class="order-card__foot"><span class="rowflex"><span class="stars stars--static" data-stars data-readonly data-value="5" data-max="5"></span><span class="ro">你給了 5 星</span></span><span class="fee">$20</span></div>
+      </a>
+      <a class="card card--link" href="history-detail.html?id=CE-2026" data-owner="runner" data-od-id="hist-4">
+        <div class="order-card__top">
+          <div><div class="order-card__rest">茶壜 · 半糖去冰綠茶</div><div class="ro" style="margin-top:4px;">我接的 · 昨天 09:50 · CE-2026</div></div>
+          <span class="badge badge--done">已完成</span>
+        </div>
+        <div class="order-card__foot"><span class="meta">待評價訂餐者</span><span class="fee">$25</span></div>
+      </a>
+    </div>
+  </div>
+
+  <nav class="tabbar" data-tabbar data-active="orders" data-od-id="tabbar"></nav>
+</main>
+
+<script src="js/campus.js"></script>
+<script>
+  var role = CampusEats.getRole();
+
+  // role-distinct headings — runner sees 帶單, orderer sees 訂單 (separate histories)
+  document.getElementById("pageTitle").textContent = role === "runner" ? "我的帶單" : "我的訂單";
+  document.title = (role === "runner" ? "我的帶單" : "我的訂單") + " · CampusEats";
+
+  // show only the active role's orders — orderer sees 我發布的, runner sees 我接的
+  document.querySelectorAll("[data-owner]").forEach(function (el) {
+    if (el.getAttribute("data-owner") !== role) el.hidden = true;
+  });
+
+  // empty-state copy per role (none triggers here, but kept honest if filtered)
+  if (role === "runner") {
+    document.getElementById("emptyActiveTitle").textContent = "目前沒有接的訂單";
+    document.getElementById("emptyActiveSub").textContent = "到接單頁看看附近的帶餐需求，接一筆順路的吧。";
+  }
+  function refreshEmpty() {
+    var anyActive = Array.prototype.some.call(
+      document.querySelectorAll('#paneActive [data-owner]'),
+      function (el) { return !el.hidden; });
+    document.getElementById("emptyActive").hidden = anyActive;
+  }
+  refreshEmpty();
+
+  var tabs = document.getElementById("tabs");
+  var panes = { active: document.getElementById("paneActive"), history: document.getElementById("paneHistory") };
+  tabs.addEventListener("click", function (e) {
+    var btn = e.target.closest("button"); if (!btn) return;
+    tabs.querySelectorAll("button").forEach(function (b) { b.classList.remove("is-active"); });
+    btn.classList.add("is-active");
+    Object.keys(panes).forEach(function (k) { panes[k].hidden = k !== btn.dataset.tab; });
+  });
+</script>
+</body>
+</html>

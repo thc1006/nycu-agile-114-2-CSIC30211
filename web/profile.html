@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>我的 · CampusEats</title>
+<link rel="stylesheet" href="css/campus-web.css" />
+<style>
+  .prof-grid { display: grid; grid-template-columns: 360px minmax(0,1fr); gap: clamp(20px,3vw,40px); align-items: start; }
+  @media (max-width: 900px) { .prof-grid { grid-template-columns: 1fr; } }
+  .prof-head { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; padding: var(--space-6) var(--space-5); }
+  .prof-head .name { font-size: var(--text-xl); font-weight: 700; }
+  .prof-head .email { font-size: var(--text-sm); color: var(--muted); }
+  .rep { display: grid; grid-template-columns: repeat(3,1fr); border-top: 1px solid var(--border-soft); }
+  .rep > div { padding: var(--space-4) var(--space-2); text-align: center; }
+  .rep > div + div { border-left: 1px solid var(--border-soft); }
+  .rep .n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: var(--text-xl); font-weight: 700; }
+  .rep .l { font-size: var(--text-xs); color: var(--muted); margin-top: 2px; }
+  .ro { font-size: var(--text-sm); color: var(--meta); }
+  .prof-section { margin-bottom: var(--space-6); }
+  .prof-section h2 { margin-bottom: var(--space-2); }
+</style>
+</head>
+<body data-od-id="profile">
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="topbar__brand" href="dashboard.html" data-brand-mark>CampusEats</a>
+      <nav class="topbar__nav" data-topnav data-active="me"></nav>
+      <span class="topbar__spacer"></span>
+      <div class="topbar__actions">
+        <span class="role-chip" data-role-name>訂餐者</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap page">
+    <div class="page__head"><h1>我的</h1></div>
+
+    <div class="prof-grid">
+      <!-- identity card -->
+      <aside>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="prof-head">
+            <span class="avatar avatar--lg">學</span>
+            <div><div class="name">校園同學</div><div class="email">student@campus.edu</div></div>
+            <div class="rowflex" style="justify-content:center;">
+              <span class="stars stars--static" data-stars data-readonly data-value="5" data-max="5"></span>
+              <span class="num" style="font-weight:700;">4.9</span>
+              <span class="ro" id="repCaption">· 帶餐者給你的評價</span>
+            </div>
+          </div>
+          <div class="rep" id="repStats"></div>
+        </div>
+        <a class="btn btn-white btn--block" href="login.html" style="margin-top:var(--space-4);" data-no-role>登出</a>
+      </aside>
+
+      <!-- account + settings -->
+      <div>
+        <!-- 訂餐者 -->
+        <section class="prof-section" id="ordererView" hidden data-od-id="profile-orderer">
+          <h2 class="h-card">帳戶</h2>
+          <div>
+            <a class="rowlink" href="orderer-reviews.html">
+              <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.2 6.1 21.3l1.2-6.6L2.5 9l6.6-.9z"/></svg></span>收到的評價</span>
+              <span class="rowflex"><span class="ro">4.9 · 18 則</span><span class="rowlink__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></span>
+            </a>
+            <button class="rowlink" type="button" id="payBtnOrderer">
+              <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>付款方式</span>
+              <span class="rowflex"><span class="ro" id="payValOrderer">面交現金 · 預設</span><span class="rowlink__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></span>
+            </button>
+            <button class="rowlink" type="button" id="pickupBtnOrderer">
+              <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>常用取餐地點</span>
+              <span class="rowflex"><span class="ro" id="pickupValOrderer">圖書館 1F</span><span class="rowlink__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 帶餐者 -->
+        <section class="prof-section" id="runnerView" hidden data-od-id="profile-runner">
+          <h2 class="h-card">帶餐</h2>
+          <div>
+            <a class="rowlink" href="runner-earnings.html">
+              <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>收入明細</span>
+              <span class="rowflex"><span class="ro">本月 $640</span><span class="rowlink__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></span>
+            </a>
+            <a class="rowlink" href="runner-reviews.html">
+              <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.2 6.1 21.3l1.2-6.6L2.5 9l6.6-.9z"/></svg></span>收到的評價</span>
+              <span class="rowflex"><span class="ro">4.9 · 32 則</span><span class="rowlink__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></span>
+            </a>
+            <button class="rowlink" type="button" id="payBtnRunner">
+              <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>收款方式</span>
+              <span class="rowflex"><span class="ro" id="payValRunner">面交現金 · 預設</span><span class="rowlink__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 共用設定 -->
+        <section class="prof-section">
+          <h2 class="h-card">設定</h2>
+          <div>
+            <a class="rowlink" href="my-orders.html">
+              <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h11l3 3v13H6zM9 4v4h7"/></svg></span><span id="recordsLabel">訂單紀錄</span></span>
+              <span class="rowlink__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span>
+            </a>
+            <div class="rowlink">
+              <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span>通知</span>
+              <span class="ro">站內 · 已開啟</span>
+            </div>
+            <a class="rowlink" href="login.html" id="switchRole" data-no-role>
+              <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>切換身份</span>
+              <span class="ro" id="switchHint">改用帶餐者視角</span>
+            </a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- 付款方式 picker (訂餐者) -->
+  <div class="sheet" id="paySheetOrderer" role="dialog" aria-modal="true" aria-labelledby="paySheetOrdererTitle">
+    <h3 id="paySheetOrdererTitle">選擇付款方式</h3>
+    <p class="body-sm" style="margin-bottom:var(--space-3);">這是你付款給帶餐者的方式，每筆交易仍可於面交時確認。</p>
+    <div id="payListOrderer">
+      <button class="rowlink" type="button" data-pay="面交現金"><span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span>面交現金</span><span class="rowlink__chev" data-check><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+      <button class="rowlink" type="button" data-pay="校園一卡通"><span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 14h4"/></svg></span>校園一卡通</span><span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+      <button class="rowlink" type="button" data-pay="LINE Pay"><span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="M8 10v4M8 14h2.5M14 10v4M17 10v4M14 12h3"/></svg></span>LINE Pay</span><span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+      <button class="rowlink" type="button" data-pay="街口支付"><span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M12 11v6M9 17h6"/></svg></span>街口支付</span><span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+    </div>
+  </div>
+
+  <!-- 收款方式 picker (帶餐者) -->
+  <div class="sheet" id="paySheetRunner" role="dialog" aria-modal="true" aria-labelledby="paySheetRunnerTitle">
+    <h3 id="paySheetRunnerTitle">選擇收款方式</h3>
+    <p class="body-sm" style="margin-bottom:var(--space-3);">這是訂餐者付款給你的方式，作為你帶餐後收款的預設。</p>
+    <div id="payListRunner">
+      <button class="rowlink" type="button" data-pay="面交現金"><span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span>面交現金</span><span class="rowlink__chev" data-check><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+      <button class="rowlink" type="button" data-pay="街口支付"><span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M12 11v6M9 17h6"/></svg></span>街口支付</span><span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+      <button class="rowlink" type="button" data-pay="LINE Pay"><span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="M8 10v4M8 14h2.5M14 10v4M17 10v4M14 12h3"/></svg></span>LINE Pay</span><span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+      <button class="rowlink" type="button" data-pay="銀行轉帳"><span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-5 9 5M5 9v8m4-8v8m6-8v8m4-8v8M3 21h18"/></svg></span>銀行轉帳</span><span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+    </div>
+  </div>
+
+  <!-- 常用取餐地點 editor (訂餐者) -->
+  <div class="sheet" id="pickupSheetOrderer" role="dialog" aria-modal="true" aria-labelledby="pickupSheetOrdererTitle">
+    <h3 id="pickupSheetOrdererTitle">常用取餐地點</h3>
+    <p class="body-sm" style="margin-bottom:var(--space-3);">設定你最常拿餐的地點，發單時會自動帶入，每筆訂單仍可逐筆修改。</p>
+    <div class="field">
+      <label for="pickupInputOrderer">地點名稱</label>
+      <input class="control" type="text" id="pickupInputOrderer" placeholder="例如：圖書館 1F 大廳、工學院 A 棟" autocomplete="off" />
+    </div>
+    <button class="btn btn-black btn--block" type="button" id="pickupSaveOrderer" style="margin-top:var(--space-4);">儲存</button>
+  </div>
+
+<script src="js/campus-web.js"></script>
+<script>
+  var role = CampusEats.getRole();
+  document.getElementById("ordererView").hidden = role === "runner";
+  document.getElementById("runnerView").hidden = role !== "runner";
+  document.getElementById("switchHint").textContent = role === "runner" ? "改用訂餐者視角" : "改用帶餐者視角";
+  document.getElementById("recordsLabel").textContent = role === "runner" ? "帶單紀錄" : "訂單紀錄";
+  document.getElementById("repCaption").textContent = role === "runner" ? "· 訂餐者給你的評價" : "· 帶餐者給你的評價";
+
+  // role-distinct reputation stats
+  var rep = document.getElementById("repStats");
+  var stats = role === "runner"
+    ? [["32", "帶餐次數"], ["$640", "本月收入"], ["98%", "準時率"]]
+    : [["18", "訂餐次數"], ["6", "本月訂餐"], ["4.9", "平均評分"]];
+  stats.forEach(function (s) { var d = document.createElement("div"); var n = document.createElement("div"); n.className = "n"; n.textContent = s[0]; var l = document.createElement("div"); l.className = "l"; l.textContent = s[1]; d.appendChild(n); d.appendChild(l); rep.appendChild(d); });
+
+  function setupPay(roleKey, btnId, valId, sheetId, listId) {
+    var btn = document.getElementById(btnId); var val = document.getElementById(valId); if (!btn || !val) return;
+    var STORE = "campuseats.pay." + roleKey;
+    var label = function (name) { return name + (name === "面交現金" ? " · 預設" : ""); };
+    function apply(name) { val.textContent = label(name); document.querySelectorAll("#" + listId + " [data-check]").forEach(function (c) { c.hidden = c.closest("[data-pay]").getAttribute("data-pay") !== name; }); }
+    var saved; try { saved = localStorage.getItem(STORE); } catch (e) {} if (saved) apply(saved);
+    btn.addEventListener("click", function () { openSheet(sheetId); });
+    document.getElementById(listId).addEventListener("click", function (e) {
+      var row = e.target.closest("[data-pay]"); if (!row) return;
+      var name = row.getAttribute("data-pay"); apply(name);
+      try { localStorage.setItem(STORE, name); } catch (e) {}
+      closeSheet(sheetId); toast((roleKey === "runner" ? "收款方式" : "付款方式") + "已更新為 " + name);
+    });
+  }
+  setupPay("orderer", "payBtnOrderer", "payValOrderer", "paySheetOrderer", "payListOrderer");
+  setupPay("runner", "payBtnRunner", "payValRunner", "paySheetRunner", "payListRunner");
+
+  // ── editable 常用取餐地點 (free text, persisted) ──────────────────
+  function setupPickup(btnId, valId, sheetId, inputId, saveId) {
+    var btn = document.getElementById(btnId), val = document.getElementById(valId),
+        input = document.getElementById(inputId), save = document.getElementById(saveId);
+    if (!btn || !val) return;
+    var STORE = "campuseats.pickup";
+    var saved; try { saved = localStorage.getItem(STORE); } catch (e) {}
+    if (saved) val.textContent = saved;
+    btn.addEventListener("click", function () { input.value = val.textContent.trim(); openSheet(sheetId); setTimeout(function () { input.focus(); }, 60); });
+    function commit() {
+      var v = input.value.trim(); if (!v) { input.focus(); return; }
+      val.textContent = v; try { localStorage.setItem(STORE, v); } catch (e) {}
+      closeSheet(sheetId); toast("常用取餐地點已更新為 " + v);
+    }
+    save.addEventListener("click", commit);
+    input.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); commit(); } });
+  }
+  setupPickup("pickupBtnOrderer", "pickupValOrderer", "pickupSheetOrderer", "pickupInputOrderer", "pickupSaveOrderer");
+</script>
+</body>
+</html>
