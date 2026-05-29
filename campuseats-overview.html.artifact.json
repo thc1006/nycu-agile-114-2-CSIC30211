@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "CampusEats · 畫面總覽",
+  "entry": "campuseats-overview.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-05-29T02:46:34.489Z",
+  "updatedAt": "2026-05-29T02:46:34.496Z",
+  "sourceSkillId": "agent-browser",
+  "designSystemId": "uber",
+  "metadata": {
+    "identifier": "campuseats-overview",
+    "artifactType": "text/html",
+    "inferred": false
+  }
+}

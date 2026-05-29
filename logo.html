@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusEats — Logo 系統</title>
+<style>
+:root {
+  /* ─── Surface ─── */
+  --bg:           #ffffff;
+  --surface:      #ffffff;
+  --surface-warm: #f8f8f8;
+  /* ─── Foreground ─── */
+  --fg:   #000000;
+  --fg-2: #000000;
+  --muted: #4b4b4b;
+  --meta:  #afafaf;
+  /* ─── Border ─── */
+  --border:      #000000;
+  --border-soft: rgba(0, 0, 0, 0.1);
+  /* ─── Accent ─── */
+  --accent:        #000000;
+  --accent-on:     #ffffff;
+  --accent-hover:  #e2e2e2;
+  --accent-active: rgba(0, 0, 0, 0.08);
+  /* ─── Typography ─── */
+  --font-display: "UberMove", "UberMoveText", system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-body:    "UberMoveText", system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono:    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --text-xs: 12px; --text-sm: 14px; --text-base: 16px; --text-lg: 18px;
+  --text-xl: 24px; --text-2xl: 32px; --text-3xl: 36px; --text-4xl: 52px;
+  --leading-body: 1.50; --leading-tight: 1.23; --tracking-display: normal;
+  /* ─── Spacing ─── */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-12: 48px;
+  --section-y-desktop: 80px; --section-y-tablet: 48px; --section-y-phone: 32px;
+  /* ─── Radius ─── */
+  --radius-sm: 999px; --radius-md: 8px; --radius-lg: 12px; --radius-pill: 9999px;
+  /* ─── Elevation ─── */
+  --elev-flat: none;
+  --elev-ring: 0 0 0 1px var(--border-soft);
+  --elev-raised: rgba(0, 0, 0, 0.12) 0px 4px 16px 0px;
+  --focus-ring: rgb(255, 255, 255) 0px 0px 0px 2px inset;
+  /* ─── Motion ─── */
+  --motion-fast: 150ms; --motion-base: 200ms; --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* ─── Layout ─── */
+  --container-max: 1136px;
+  --container-gutter-desktop: 24px; --container-gutter-tablet: 16px; --container-gutter-phone: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--fg);
+  line-height: var(--leading-body);
+  font-size: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: var(--leading-tight); }
+
+.container { max-width: var(--container-max); margin-inline: auto; padding-inline: clamp(var(--container-gutter-phone), 4vw, var(--container-gutter-desktop)); }
+
+/* ── Logo lockup primitives ── */
+.cmark { display: block; color: var(--fg); }     /* color drives the mark fill */
+.lockup { display: inline-flex; align-items: center; gap: 0.42em; color: var(--fg); }
+.lockup .cmark { width: 1.18em; height: 1.18em; flex: none; }
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  line-height: 1;
+  white-space: nowrap;
+  color: inherit;
+}
+.lockup--stacked { flex-direction: column; gap: 0.28em; text-align: center; }
+.lockup--stacked .cmark { width: 1.9em; height: 1.9em; }
+
+/* ── Page chrome ── */
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-soft);
+}
+.topbar .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.topbar .lockup { font-size: 20px; }
+.btn {
+  font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500;
+  border: none; cursor: pointer;
+  background: var(--accent); color: var(--accent-on);
+  padding: 10px 16px; border-radius: var(--radius-sm);
+  transition: background var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+}
+.btn:hover { background: #1a1a1a; }
+.btn:active { transform: translateY(1px); }
+.btn--ghost { background: var(--surface-warm); color: var(--fg); }
+.btn--ghost:hover { background: var(--accent-hover); }
+
+.hero { padding-block: clamp(56px, 9vw, 112px); text-align: center; }
+.hero .lockup { font-size: clamp(34px, 8vw, 64px); margin-bottom: var(--space-6); }
+.hero p { color: var(--muted); max-width: 46ch; margin-inline: auto; font-size: var(--text-lg); }
+.eyebrow {
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--meta);
+  margin-bottom: var(--space-4);
+}
+
+section.block { padding-block: clamp(40px, 6vw, 72px); border-top: 1px solid var(--border-soft); }
+.section-head { margin-bottom: var(--space-8); }
+.section-head h2 { font-size: var(--text-3xl); }
+.section-head p { color: var(--muted); margin-top: var(--space-2); max-width: 56ch; }
+
+.grid { display: grid; gap: var(--space-4); }
+.grid--variants { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.grid--favicon { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.grid--specs { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+.card {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex; flex-direction: column; gap: var(--space-4);
+}
+.card .stage {
+  flex: 1; min-height: 150px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--surface-warm);
+}
+.card .stage--dark { background: var(--fg); }
+.card .stage--dark .lockup, .card .stage--dark .cmark { color: var(--accent-on); }
+.card .cap { font-size: var(--text-sm); color: var(--muted); }
+.card .cap b { color: var(--fg); font-weight: 600; }
+
+/* App icon tile */
+.appicon {
+  width: 112px; height: 112px;
+  background: var(--fg);
+  border-radius: 24%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--elev-raised);
+}
+.appicon .cmark { width: 62%; height: 62%; color: var(--accent-on); }
+
+/* Favicon strip */
+.fav {
+  background: var(--fg); border-radius: 22%;
+  display: flex; align-items: center; justify-content: center;
+}
+.fav .cmark { color: var(--accent-on); }
+
+/* Clear space */
+.clearspace { display: flex; justify-content: center; }
+.cs-box {
+  position: relative; padding: 56px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 55px, var(--border-soft) 55px 56px),
+    repeating-linear-gradient(90deg, transparent 0 55px, var(--border-soft) 55px 56px);
+  border: 1px dashed var(--meta);
+  border-radius: var(--radius-md);
+}
+.cs-box .lockup { font-size: 38px; background: var(--bg); }
+
+/* Misuse */
+.dont .stage { position: relative; }
+.dont .tag {
+  position: absolute; top: 10px; left: 10px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em;
+  color: var(--accent-on); background: var(--fg);
+  padding: 3px 8px; border-radius: var(--radius-sm);
+}
+.x-stretch .wordmark { transform: scaleX(1.6); }
+.x-color .lockup { color: #d8431f; }
+.x-rotate .lockup { transform: rotate(-12deg); }
+
+/* Spec rows */
+.spec { border: 1px solid var(--border-soft); border-radius: var(--radius-lg); padding: var(--space-6); }
+.swatch-row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+.swatch { width: 40px; height: 40px; border-radius: var(--radius-md); border: 1px solid var(--border-soft); flex: none; }
+.swatch--blk { background: #000; }
+.swatch--wht { background: #fff; }
+.kv { font-size: var(--text-sm); }
+.kv .k { font-weight: 600; }
+.kv .v { font-family: var(--font-mono); color: var(--muted); }
+.specimen { font-family: var(--font-display); font-weight: 700; letter-spacing: -.022em; line-height: 1.1; }
+
+footer.foot { background: var(--fg); color: var(--accent-on); padding-block: var(--space-12); margin-top: var(--space-12); }
+footer.foot .lockup { color: var(--accent-on); font-size: 22px; margin-bottom: var(--space-3); }
+footer.foot p { color: #cfcfcf; font-size: var(--text-sm); max-width: 50ch; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+  background: var(--fg); color: var(--accent-on);
+  padding: 12px 20px; border-radius: var(--radius-sm); font-size: var(--text-sm);
+  opacity: 0; pointer-events: none; transition: opacity var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
+  box-shadow: var(--elev-raised);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 600px) {
+  .topbar .lockup .wordmark { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Reusable mark symbol: pin ⊕ knockout fork. color: drives the fill. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ce-mark" viewBox="0 0 40 40">
+    <mask id="ce-fork-mask">
+      <path d="M20 4 C26.6 4 32 8.8 32 14.8 C32 22.5 20 35.5 20 35.5 C20 35.5 8 22.5 8 14.8 C8 8.8 13.4 4 20 4 Z" fill="#fff"/>
+      <rect x="16.4" y="9.4" width="1.8" height="6.6" rx="0.9" fill="#000"/>
+      <rect x="19.1" y="9.4" width="1.8" height="6.6" rx="0.9" fill="#000"/>
+      <rect x="21.8" y="9.4" width="1.8" height="6.6" rx="0.9" fill="#000"/>
+      <rect x="16.4" y="14.2" width="7.2" height="1.9" rx="0.95" fill="#000"/>
+      <rect x="19.1" y="14.2" width="1.8" height="9.4" rx="0.9" fill="#000"/>
+    </mask>
+    <rect width="40" height="40" fill="currentColor" mask="url(#ce-fork-mask)"/>
+  </symbol>
+</svg>
+
+<header class="topbar">
+  <div class="container">
+    <span class="lockup"><svg class="cmark"><use href="#ce-mark"/></svg><span class="wordmark">CampusEats</span></span>
+    <button class="btn" id="copyBtn">複製 Mark SVG</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero container">
+    <div class="eyebrow">Brand Mark · 品牌標誌系統</div>
+    <span class="lockup"><svg class="cmark"><use href="#ce-mark"/></svg><span class="wordmark">CampusEats</span></span>
+    <p>定位圖釘 ⊕ 餐叉鏤空 —— 一個符號講清楚「在校園裡媒合送餐」。沿用 Uber 視覺系統：純黑白、幾何、無漸層無襯線。</p>
+  </section>
+
+  <section class="block container">
+    <div class="section-head">
+      <h2>核心組合</h2>
+      <p>橫式為主鎖定組合，用於頁首、導覽與一般場合；直式用於正方版位；單獨 Mark 用於 app icon、頭像、favicon。</p>
+    </div>
+    <div class="grid grid--variants">
+      <div class="card">
+        <div class="stage"><span class="lockup" style="font-size:30px"><svg class="cmark"><use href="#ce-mark"/></svg><span class="wordmark">CampusEats</span></span></div>
+        <div class="cap"><b>橫式鎖定組合</b> · 預設首選</div>
+      </div>
+      <div class="card">
+        <div class="stage"><span class="lockup lockup--stacked" style="font-size:24px"><svg class="cmark"><use href="#ce-mark"/></svg><span class="wordmark">CampusEats</span></span></div>
+        <div class="cap"><b>直式鎖定組合</b> · 正方／置中版位</div>
+      </div>
+      <div class="card">
+        <div class="stage"><svg class="cmark" style="width:72px;height:72px"><use href="#ce-mark"/></svg></div>
+        <div class="cap"><b>單獨 Mark</b> · 圖示／頭像</div>
+      </div>
+      <div class="card">
+        <div class="stage stage--dark"><span class="lockup" style="font-size:30px"><svg class="cmark"><use href="#ce-mark"/></svg><span class="wordmark">CampusEats</span></span></div>
+        <div class="cap"><b>反白版</b> · 深色底／頁尾</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block container">
+    <div class="section-head">
+      <h2>App Icon</h2>
+      <p>真黑圓角方塊（圓角 24%）+ 反白 Mark，符合 Uber app icon 語彙。</p>
+    </div>
+    <div style="display:flex;gap:var(--space-8);flex-wrap:wrap;align-items:center">
+      <div class="appicon"><svg class="cmark"><use href="#ce-mark"/></svg></div>
+      <div class="appicon" style="width:72px;height:72px"><svg class="cmark"><use href="#ce-mark"/></svg></div>
+      <div class="appicon" style="width:52px;height:52px"><svg class="cmark"><use href="#ce-mark"/></svg></div>
+    </div>
+  </section>
+
+  <section class="block container">
+    <div class="section-head">
+      <h2>Favicon</h2>
+      <p>小尺寸只保留 Mark；16px 以下圖釘輪廓仍清晰可辨。</p>
+    </div>
+    <div class="grid grid--favicon">
+      <div class="card" style="align-items:center">
+        <div class="fav" style="width:48px;height:48px"><svg class="cmark" style="width:30px;height:30px"><use href="#ce-mark"/></svg></div>
+        <div class="cap">48 × 48</div>
+      </div>
+      <div class="card" style="align-items:center">
+        <div class="fav" style="width:32px;height:32px"><svg class="cmark" style="width:20px;height:20px"><use href="#ce-mark"/></svg></div>
+        <div class="cap">32 × 32</div>
+      </div>
+      <div class="card" style="align-items:center">
+        <div class="fav" style="width:16px;height:16px"><svg class="cmark" style="width:11px;height:11px"><use href="#ce-mark"/></svg></div>
+        <div class="cap">16 × 16</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block container">
+    <div class="section-head">
+      <h2>留白與最小尺寸</h2>
+      <p>四周保留至少「一個 Mark 高度」的淨空；橫式組合最小寬度 96px，Mark 最小 16px。</p>
+    </div>
+    <div class="clearspace">
+      <div class="cs-box"><span class="lockup"><svg class="cmark"><use href="#ce-mark"/></svg><span class="wordmark">CampusEats</span></span></div>
+    </div>
+  </section>
+
+  <section class="block container">
+    <div class="section-head">
+      <h2>禁止用法</h2>
+      <p>標誌只走黑白雙色。不拉伸、不上色、不旋轉、不加漸層與陰影描邊。</p>
+    </div>
+    <div class="grid grid--variants dont">
+      <div class="card">
+        <div class="stage x-stretch"><span class="tag">✕ 拉伸</span><span class="lockup" style="font-size:26px"><svg class="cmark"><use href="#ce-mark"/></svg><span class="wordmark">CampusEats</span></span></div>
+        <div class="cap">不要改變字寬比例</div>
+      </div>
+      <div class="card">
+        <div class="stage x-color"><span class="tag">✕ 上色</span><span class="lockup" style="font-size:28px"><svg class="cmark"><use href="#ce-mark"/></svg><span class="wordmark">CampusEats</span></span></div>
+        <div class="cap">不要加入品牌色以外的顏色</div>
+      </div>
+      <div class="card">
+        <div class="stage x-rotate"><span class="tag">✕ 旋轉</span><span class="lockup" style="font-size:28px"><svg class="cmark"><use href="#ce-mark"/></svg><span class="wordmark">CampusEats</span></span></div>
+        <div class="cap">不要傾斜或旋轉</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block container">
+    <div class="section-head">
+      <h2>規格</h2>
+      <p>顏色、字體與 Mark 幾何的最小規格。</p>
+    </div>
+    <div class="grid grid--specs">
+      <div class="spec">
+        <div class="kv" style="margin-bottom:var(--space-4);font-weight:600">色彩</div>
+        <div class="swatch-row"><span class="swatch swatch--blk"></span><span class="kv"><span class="k">Uber Black</span><br><span class="v">#000000</span></span></div>
+        <div class="swatch-row"><span class="swatch swatch--wht"></span><span class="kv"><span class="k">Pure White</span><br><span class="v">#ffffff</span></span></div>
+      </div>
+      <div class="spec">
+        <div class="kv" style="margin-bottom:var(--space-4);font-weight:600">字體</div>
+        <div class="specimen" style="font-size:34px">CampusEats</div>
+        <div class="kv v" style="margin-top:var(--space-3)">UberMove / UberMoveText Bold 700 · letter-spacing −0.022em</div>
+      </div>
+      <div class="spec">
+        <div class="kv" style="margin-bottom:var(--space-4);font-weight:600">Mark 幾何</div>
+        <div class="kv v">viewBox 40 × 40</div>
+        <div class="kv v">圖釘 teardrop + 三齒餐叉鏤空</div>
+        <div class="kv v">app icon 圓角 24% · 最小 16px</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="container">
+    <span class="lockup"><svg class="cmark"><use href="#ce-mark"/></svg><span class="wordmark">CampusEats</span></span>
+    <p>校園美食媒合平台 · 登入 → 發單 → 接單 → 確認收餐 → 評價</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast">已複製 Mark SVG 到剪貼簿</div>
+
+<script>
+const MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="160" height="160" role="img" aria-label="CampusEats mark">
+  <mask id="ce-fork">
+    <path d="M20 4 C26.6 4 32 8.8 32 14.8 C32 22.5 20 35.5 20 35.5 C20 35.5 8 22.5 8 14.8 C8 8.8 13.4 4 20 4 Z" fill="#fff"/>
+    <rect x="16.4" y="9.4" width="1.8" height="6.6" rx="0.9" fill="#000"/>
+    <rect x="19.1" y="9.4" width="1.8" height="6.6" rx="0.9" fill="#000"/>
+    <rect x="21.8" y="9.4" width="1.8" height="6.6" rx="0.9" fill="#000"/>
+    <rect x="16.4" y="14.2" width="7.2" height="1.9" rx="0.95" fill="#000"/>
+    <rect x="19.1" y="14.2" width="1.8" height="9.4" rx="0.9" fill="#000"/>
+  </mask>
+  <rect width="40" height="40" fill="#000" mask="url(#ce-fork)"/>
+</svg>`;
+
+const toast = document.getElementById('toast');
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(MARK_SVG);
+    showToast('已複製 Mark SVG 到剪貼簿');
+  } catch (e) {
+    showToast('複製失敗 — 可手動取用 assets/logo-mark.svg');
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>評價 · CampusEats</title>
+<link rel="stylesheet" href="css/campus.css" />
+<style>
+  .rate-card { text-align:center; display:flex; flex-direction:column; align-items:center; gap:var(--space-3); padding:var(--space-6) var(--space-5); }
+  .rate-card .who { font-size:var(--text-xl); font-weight:700; }
+  .rate-card .sub { font-size:var(--text-sm); color:var(--muted); }
+  .rate-val { font-size:var(--text-sm); color:var(--muted); min-height:20px; }
+  .quick-tags { display:flex; flex-wrap:wrap; gap:var(--space-2); justify-content:center; }
+  .qt { padding:8px 14px; border:1px solid var(--border-soft); border-radius:var(--radius-sm); font-size:var(--text-sm); background:var(--bg); transition:background var(--motion-fast),border-color var(--motion-fast); }
+  .qt.is-on { background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .done-mark { width:72px;height:72px;border-radius:50%;background:var(--fg);display:grid;place-items:center;margin:0 auto; }
+  .done-mark svg { width:34px;height:34px;stroke:var(--bg);stroke-width:2.6;fill:none; }
+  [hidden]{display:none !important;}
+</style>
+</head>
+<body>
+<main class="app" data-od-id="rating">
+  <header class="appbar">
+    <a class="iconbtn" href="my-orders.html" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></a>
+    <div class="appbar__title">評價</div>
+    <button class="iconbtn" id="skipBtn" aria-label="略過" style="font-size:var(--text-sm);width:auto;padding:0 6px;color:var(--muted);">略過</button>
+  </header>
+
+  <div class="appbody appbody--nonav" id="ratePane">
+    <div class="meta center">CE-2039 · 麥味登 蛋餅＋紅茶</div>
+
+    <div class="card rate-card">
+      <span class="avatar avatar--lg" id="targetAvatar">翔</span>
+      <div>
+        <div class="who" id="targetName">帶餐者 阿翔</div>
+        <div class="sub">交易已完成 · 為這次合作打個分數</div>
+      </div>
+      <div class="stars stars--lg" data-stars data-value="0" data-max="5" id="starWidget" style="margin-top:var(--space-2);"></div>
+      <div class="rate-val" id="rateVal">點選星等</div>
+    </div>
+
+    <div>
+      <p class="body-sm center" id="tagsHint" style="margin-bottom:var(--space-3);">想補充什麼？（選填）</p>
+      <div class="quick-tags" id="quickTags"></div>
+    </div>
+
+    <div class="field" style="margin-top:var(--space-4);">
+      <textarea class="control" id="comment" placeholder="留下一句話（選填）"></textarea>
+      <span class="hint">MVP 以星等為主，文字評論為加分選填。</span>
+    </div>
+  </div>
+
+  <!-- 完成狀態 -->
+  <div class="appbody appbody--nonav" id="donePane" hidden style="justify-content:center; text-align:center; gap:var(--space-4);">
+    <div class="done-mark"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <h2 class="h-page">評價完成</h2>
+    <p class="muted">謝謝你！雙向評價能讓校園帶餐更值得信任。</p>
+    <div class="stack-3" style="margin-top:var(--space-4);">
+      <a class="btn btn-black btn--block btn--lg" id="homeBtn" href="dashboard.html">回到首頁</a>
+      <a class="btn btn-ghost btn--block" href="my-orders.html">查看訂單紀錄</a>
+    </div>
+  </div>
+
+  <div class="actionbar" id="actionbar">
+    <button class="btn btn-black btn--block btn--lg" id="submitBtn" disabled>送出評價</button>
+  </div>
+</main>
+
+<script src="js/campus.js"></script>
+<script>
+  var params = new URLSearchParams(location.search);
+  var role = params.get("role") || CampusEats.getRole();
+  // you rate the *other* party
+  if (role === "runner") {
+    document.getElementById("targetName").textContent = "訂餐者 阿哲";
+    document.getElementById("targetAvatar").textContent = "哲";
+  }
+
+  // role-aware compliment tags — orderer praises the runner (matches the
+  // runner reviews page vocabulary); runner praises the customer.
+  var TAGS = role === "runner"
+    ? ["準時取餐", "備註清楚", "付款乾脆", "友善有禮", "好溝通", "取餐方便", "耐心等候", "體諒辛勞"]
+    : ["準時送達", "餐點正確", "溝通清楚", "包裝完整", "態度親切", "路線快速", "細心保溫", "主動回報"];
+  document.getElementById("tagsHint").textContent =
+    "想給" + (role === "runner" ? "訂餐者" : "帶餐者") + "什麼肯定？（可複選）";
+  var tagWrap = document.getElementById("quickTags");
+  TAGS.forEach(function (t) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "qt"; b.textContent = t;
+    tagWrap.appendChild(b);
+  });
+  // return to the active role's own home, not a fixed screen
+  document.getElementById("homeBtn").href = CampusEats.home(role);
+
+  var widget = document.getElementById("starWidget");
+  var rateVal = document.getElementById("rateVal");
+  var submitBtn = document.getElementById("submitBtn");
+  var LABELS = { 1: "需要改進", 2: "普通", 3: "還可以", 4: "很好", 5: "非常滿意" };
+  var current = 0;
+  widget.addEventListener("rate", function (e) {
+    current = e.detail;
+    rateVal.textContent = current + " 星 · " + LABELS[current];
+    submitBtn.disabled = current === 0;
+  });
+
+  document.getElementById("quickTags").addEventListener("click", function (e) {
+    var qt = e.target.closest(".qt"); if (!qt) return;
+    qt.classList.toggle("is-on");
+  });
+
+  submitBtn.addEventListener("click", function () {
+    if (current === 0) return;
+    document.getElementById("ratePane").hidden = true;
+    document.getElementById("actionbar").hidden = true;
+    document.getElementById("donePane").hidden = false;
+    toast("已送出 " + current + " 星評價");
+  });
+
+  document.getElementById("skipBtn").addEventListener("click", function () {
+    window.location.href = CampusEats.home(role);
+  });
+</script>
+</body>
+</html>

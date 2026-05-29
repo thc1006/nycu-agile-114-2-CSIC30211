@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "CampusEats — Logo 系統",
+  "entry": "campuseats-logo.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-05-29T09:59:27.416Z",
+  "updatedAt": "2026-05-29T09:59:27.429Z",
+  "sourceSkillId": "agent-browser",
+  "designSystemId": "uber",
+  "metadata": {
+    "identifier": "campuseats-logo",
+    "artifactType": "text/html",
+    "inferred": false
+  }
+}

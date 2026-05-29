@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>我的 · CampusEats</title>
+<link rel="stylesheet" href="css/campus.css" />
+<style>
+  #ordererView, #runnerView { display:flex; flex-direction:column; gap:var(--space-6); }
+  .profile-head { display:flex; flex-direction:column; align-items:center; gap:var(--space-3); text-align:center; padding-block:var(--space-2) var(--space-2); }
+  .profile-head .name { font-size:var(--text-xl); font-weight:700; }
+  .profile-head .email { font-size:var(--text-sm); color:var(--muted); }
+  .rep { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--border-soft); border-radius:var(--radius-lg); overflow:hidden; }
+  .rep > div { padding:var(--space-4) var(--space-2); text-align:center; }
+  .rep > div + div { border-left:1px solid var(--border-soft); }
+  .rep .n { font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:var(--text-xl); font-weight:700; }
+  .rep .l { font-size:var(--text-xs); color:var(--muted); margin-top:2px; }
+  .review { padding:var(--space-4) 0; border-bottom:1px solid var(--border-soft); }
+  .review:last-child { border-bottom:none; }
+  .review .top { display:flex; align-items:center; justify-content:space-between; }
+  .review .who { font-weight:600; font-size:var(--text-sm); }
+  .review p { font-size:var(--text-sm); color:var(--muted); margin-top:6px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main class="app" data-od-id="profile">
+  <header class="appbar">
+    <div class="appbar__title" style="grid-column:1/-1;">我的</div>
+  </header>
+
+  <div class="appbody">
+    <!-- ============ 訂餐者視角 ============ -->
+    <div id="ordererView" hidden data-od-id="profile-orderer">
+      <div class="profile-head">
+        <span class="avatar avatar--lg">學</span>
+        <div>
+          <div class="name">校園同學</div>
+          <div class="email">student@campus.edu</div>
+        </div>
+        <div class="rowflex" style="justify-content:center;">
+          <span class="stars stars--static" data-stars data-readonly data-value="5" data-max="5"></span>
+          <span class="num" style="font-weight:700;">4.9</span>
+          <span class="ro" style="color:var(--meta);font-size:var(--text-sm);">· 帶餐者給你的評價</span>
+        </div>
+      </div>
+
+      <div class="rep">
+        <div><div class="n">18</div><div class="l">訂餐次數</div></div>
+        <div><div class="n">6</div><div class="l">本月訂餐</div></div>
+        <div><div class="n">4.9</div><div class="l">平均評分</div></div>
+      </div>
+
+      <section>
+        <h2 class="h-card" style="margin-bottom:var(--space-2);">帳戶</h2>
+        <div>
+          <a class="rowlink" href="orderer-reviews.html">
+            <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.2 6.1 21.3l1.2-6.6L2.5 9l6.6-.9z"/></svg></span>收到的評價</span>
+            <span class="rowflex"><span class="ro" style="color:var(--meta);">4.9 · 18 則</span><span class="rowlink__chev"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <button class="rowlink" type="button" id="payBtnOrderer">
+            <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>付款方式</span>
+            <span class="rowflex"><span class="ro" id="payValOrderer" style="color:var(--meta);">面交現金 · 預設</span><span class="rowlink__chev"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></span>
+          </button>
+          <div class="rowlink">
+            <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>常用取餐地點</span>
+            <span class="ro" style="color:var(--meta);">圖書館 1F</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ 帶餐者視角 ============ -->
+    <div id="runnerView" hidden data-od-id="profile-runner">
+      <div class="profile-head">
+        <span class="avatar avatar--lg">學</span>
+        <div>
+          <div class="name">校園同學</div>
+          <div class="email">student@campus.edu</div>
+        </div>
+        <div class="rowflex" style="justify-content:center;">
+          <span class="stars stars--static" data-stars data-readonly data-value="5" data-max="5"></span>
+          <span class="num" style="font-weight:700;">4.9</span>
+          <span class="ro" style="color:var(--meta);font-size:var(--text-sm);">· 訂餐者給你的評價</span>
+        </div>
+      </div>
+
+      <div class="rep">
+        <div><div class="n">32</div><div class="l">帶餐次數</div></div>
+        <div><div class="n">$640</div><div class="l">本月收入</div></div>
+        <div><div class="n">98%</div><div class="l">準時率</div></div>
+      </div>
+
+      <section>
+        <h2 class="h-card" style="margin-bottom:var(--space-2);">帶餐</h2>
+        <div>
+          <a class="rowlink" href="runner-earnings.html">
+            <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>收入明細</span>
+            <span class="rowflex"><span class="ro" style="color:var(--meta);">本月 $640</span><span class="rowlink__chev"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <a class="rowlink" href="runner-reviews.html">
+            <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.2 6.1 21.3l1.2-6.6L2.5 9l6.6-.9z"/></svg></span>收到的評價</span>
+            <span class="rowflex"><span class="ro" style="color:var(--meta);">4.9 · 32 則</span><span class="rowlink__chev"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <button class="rowlink" type="button" id="payBtnRunner">
+            <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>收款方式</span>
+            <span class="rowflex"><span class="ro" id="payValRunner" style="color:var(--meta);">面交現金 · 預設</span><span class="rowlink__chev"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ 共用設定 ============ -->
+    <section>
+      <h2 class="h-card" style="margin-bottom:var(--space-2);">設定</h2>
+      <div>
+        <a class="rowlink" href="my-orders.html">
+          <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><path d="M6 4h11l3 3v13H6zM9 4v4h7"/></svg></span><span id="recordsLabel">訂單紀錄</span></span>
+          <span class="rowlink__chev"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>
+        </a>
+        <div class="rowlink">
+          <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span>通知</span>
+          <span class="ro" style="color:var(--meta);">站內 · 已開啟</span>
+        </div>
+        <!-- switching role happens only by returning to the login gate -->
+        <a class="rowlink" href="login.html" id="switchRole">
+          <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>切換身份</span>
+          <span class="ro" id="switchHint" style="color:var(--meta);">改用帶餐者視角</span>
+        </a>
+      </div>
+    </section>
+
+    <a class="btn btn-white btn--block" href="login.html">登出</a>
+  </div>
+
+  <nav class="tabbar" data-tabbar data-active="me" data-od-id="tabbar"></nav>
+
+  <!-- 付款方式 picker (訂餐者) -->
+  <div class="sheet" id="paySheetOrderer" role="dialog" aria-modal="true" aria-labelledby="paySheetOrdererTitle">
+    <div class="sheet__grip"></div>
+    <h3 id="paySheetOrdererTitle">選擇付款方式</h3>
+    <p class="body-sm" style="margin-bottom:var(--space-3);">這是你付款給帶餐者的方式，每筆交易仍可於面交時確認。</p>
+    <div id="payListOrderer">
+      <button class="rowlink" type="button" data-pay="面交現金">
+        <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span>面交現金</span>
+        <span class="rowlink__chev" data-check><svg viewBox="0 0 24 24" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span>
+      </button>
+      <button class="rowlink" type="button" data-pay="校園一卡通">
+        <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 14h4"/></svg></span>校園一卡通</span>
+        <span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span>
+      </button>
+      <button class="rowlink" type="button" data-pay="LINE Pay">
+        <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="M8 10v4M8 14h2.5M14 10v4M17 10v4M14 12h3"/></svg></span>LINE Pay</span>
+        <span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span>
+      </button>
+      <button class="rowlink" type="button" data-pay="街口支付">
+        <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M12 11v6M9 17h6"/></svg></span>街口支付</span>
+        <span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 收款方式 picker (帶餐者) -->
+  <div class="sheet" id="paySheetRunner" role="dialog" aria-modal="true" aria-labelledby="paySheetRunnerTitle">
+    <div class="sheet__grip"></div>
+    <h3 id="paySheetRunnerTitle">選擇收款方式</h3>
+    <p class="body-sm" style="margin-bottom:var(--space-3);">這是訂餐者付款給你的方式，作為你帶餐後收款的預設。</p>
+    <div id="payListRunner">
+      <button class="rowlink" type="button" data-pay="面交現金">
+        <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span>面交現金</span>
+        <span class="rowlink__chev" data-check><svg viewBox="0 0 24 24" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span>
+      </button>
+      <button class="rowlink" type="button" data-pay="街口支付">
+        <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M12 11v6M9 17h6"/></svg></span>街口支付</span>
+        <span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span>
+      </button>
+      <button class="rowlink" type="button" data-pay="LINE Pay">
+        <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="M8 10v4M8 14h2.5M14 10v4M17 10v4M14 12h3"/></svg></span>LINE Pay</span>
+        <span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span>
+      </button>
+      <button class="rowlink" type="button" data-pay="銀行轉帳">
+        <span class="rowflex"><span class="rowlink__icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5M5 9v8m4-8v8m6-8v8m4-8v8M3 21h18"/></svg></span>銀行轉帳</span>
+        <span class="rowlink__chev" data-check hidden><svg viewBox="0 0 24 24" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></span>
+      </button>
+    </div>
+  </div>
+</main>
+<script src="js/campus.js"></script>
+<script>
+  var role = CampusEats.getRole();
+
+  // show only the active role's profile — orderer and runner never mix
+  document.getElementById("ordererView").hidden = role === "runner";
+  document.getElementById("runnerView").hidden = role !== "runner";
+
+  // the switch row points to the *other* role, but the choice is made at login
+  document.getElementById("switchHint").textContent =
+    role === "runner" ? "改用訂餐者視角" : "改用帶餐者視角";
+
+  // records entry reads as the role's own history — 帶單紀錄 vs 訂單紀錄
+  document.getElementById("recordsLabel").textContent =
+    role === "runner" ? "帶單紀錄" : "訂單紀錄";
+
+  // ── payment-method picker (面交現金 is the default) ─────────────────
+  function setupPay(roleKey, btnId, valId, sheetId, listId) {
+    var btn = document.getElementById(btnId);
+    var val = document.getElementById(valId);
+    if (!btn || !val) return;
+    var STORE = "campuseats.pay." + roleKey;
+    var label = function (name) { return name + (name === "面交現金" ? " · 預設" : ""); };
+    function apply(name) {
+      val.textContent = label(name);
+      document.querySelectorAll("#" + listId + " [data-check]").forEach(function (c) {
+        c.hidden = c.closest("[data-pay]").getAttribute("data-pay") !== name;
+      });
+    }
+    var saved;
+    try { saved = localStorage.getItem(STORE); } catch (e) {}
+    if (saved) apply(saved);
+    btn.addEventListener("click", function () { openSheet(sheetId); });
+    document.getElementById(listId).addEventListener("click", function (e) {
+      var row = e.target.closest("[data-pay]"); if (!row) return;
+      var name = row.getAttribute("data-pay");
+      apply(name);
+      try { localStorage.setItem(STORE, name); } catch (e) {}
+      closeSheet(sheetId);
+      toast((roleKey === "runner" ? "收款方式" : "付款方式") + "已更新為 " + name);
+    });
+  }
+  setupPay("orderer", "payBtnOrderer", "payValOrderer", "paySheetOrderer", "payListOrderer");
+  setupPay("runner", "payBtnRunner", "payValRunner", "paySheetRunner", "payListRunner");
+</script>
+</body>
+</html>
