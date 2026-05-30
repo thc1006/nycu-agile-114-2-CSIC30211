@@ -95,6 +95,15 @@
 
 <script src="js/campus.js"></script>
 <script>
+  // preselect the role passed from landing / register (?role=orderer|runner)
+  (function () {
+    var r = new URLSearchParams(location.search).get("role");
+    if (r === "runner" || r === "orderer") {
+      var input = document.querySelector('input[name=role][value="' + r + '"]');
+      if (input) input.checked = true;
+    }
+  })();
+
   // legal links are demo placeholders — acknowledge the tap, don't jump to top
   document.querySelectorAll("[data-legal]").forEach(function (a) {
     a.addEventListener("click", function (e) {

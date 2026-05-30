@@ -222,7 +222,9 @@ p { margin: 0; text-wrap: pretty; }
 .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 600; letter-spacing: .02em; background: var(--surface-warm); color: var(--muted); white-space: nowrap; }
 .badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .badge--open    { background: var(--surface-warm); color: var(--fg); }
-.badge--matched, .badge--buying { background: color-mix(in srgb, var(--warn) 16%, transparent); color: color-mix(in srgb, var(--warn) 50%, #000); }
+.badge--matched { background: var(--surface-warm); color: var(--fg); }
+.badge--buying  { background: color-mix(in srgb, var(--warn) 16%, transparent); color: color-mix(in srgb, var(--warn) 50%, #000); }
+.badge--delivering { background: var(--fg); color: var(--bg); }
 .badge--delivered, .badge--done { background: color-mix(in srgb, var(--success) 14%, transparent); color: color-mix(in srgb, var(--success) 72%, #000); }
 .badge--cancelled { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
 .tag { display: inline-flex; align-items: center; padding: 4px 10px; border: 1px solid var(--border-soft); border-radius: var(--radius-sm); font-size: var(--text-xs); color: var(--muted); }

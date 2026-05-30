@@ -127,7 +127,7 @@
       <div class="card" data-od-id="active-order">
         <div class="order-card__top">
           <div>
-            <div class="order-card__rest">阿嬤的飯桶 · 雞腿便當</div>
+            <div class="order-card__rest">阿嬤的飯桶 · 招牌炸雞腿便當</div>
             <div class="meta" style="margin-top:4px;">訂單 #CE-2048</div>
           </div>
           <span class="badge badge--buying">購買中</span>
@@ -137,7 +137,7 @@
           <div class="order-line"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>希望 12:30 前送達 · 帶餐者 阿翔</div>
         </div>
         <div class="order-card__foot">
-          <a class="track-link" href="order-tracking.html">點擊查看狀態時間軸<span class="rowlink__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></a>
+          <a class="track-link" href="order-tracking.html?id=CE-2048">點擊查看狀態時間軸<span class="rowlink__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></a>
         </div>
       </div>
     </div>
@@ -148,7 +148,7 @@
       <div class="rail">
         <div class="reorder" data-reorder="mai">
           <div class="r-rest">拉亞漢堡</div>
-          <div class="r-item">蛋餅＋紅茶微糖少冰</div>
+          <div class="r-item">原味蛋餅＋奶茶（微糖少冰）</div>
           <div class="r-foot">
             <span class="fee r-fee" style="font-size:var(--text-base);">$23</span>
             <a class="r-again" href="post-order.html?reorder=mai">再發一次<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg></a>
@@ -156,7 +156,7 @@
         </div>
         <div class="reorder" data-reorder="wu">
           <div class="r-rest">茶壜</div>
-          <div class="r-item">微糖少冰珍奶 ×1</div>
+          <div class="r-item">珍珠奶茶（微糖少冰）×1</div>
           <div class="r-foot">
             <span class="fee r-fee" style="font-size:var(--text-base);">$15</span>
             <a class="r-again" href="post-order.html?reorder=wu">再發一次<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg></a>
@@ -164,7 +164,7 @@
         </div>
         <div class="reorder" data-reorder="buf">
           <div class="r-rest">阿嬤的飯桶</div>
-          <div class="r-item">三菜一肉便當</div>
+          <div class="r-item">三菜一肉自助餐（不要辣）</div>
           <div class="r-foot">
             <span class="fee r-fee" style="font-size:var(--text-base);">$20</span>
             <a class="r-again" href="post-order.html?reorder=buf">再發一次<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg></a>
@@ -208,16 +208,24 @@
     toast("目前沒有新通知", { icon: false });
   });
 
-  // 取餐地點 picker — updates the default pickup spot shown on the home anchor
+  // 取餐地點 picker — updates the default pickup spot shown on the home anchor.
+  // Persisted so it carries into the 發單 form's 取餐地點 default.
   var locTxt = document.getElementById("locTxt");
+  function paintLoc(name) {
+    locTxt.textContent = "送到 · " + name;
+    document.querySelectorAll("#locList [data-loc]").forEach(function (row) {
+      var chk = row.querySelector("[data-check]");
+      if (chk) chk.hidden = row.getAttribute("data-loc") !== name;
+    });
+  }
+  paintLoc(CampusEats.getDropoff());
+
   document.getElementById("locBtn").addEventListener("click", function () { openSheet("locSheet"); });
   document.getElementById("locList").addEventListener("click", function (e) {
     var row = e.target.closest("[data-loc]"); if (!row) return;
     var name = row.getAttribute("data-loc");
-    locTxt.textContent = "送到 · " + name;
-    document.querySelectorAll("#locList [data-check]").forEach(function (c) {
-      c.hidden = c.closest("[data-loc]") !== row;
-    });
+    CampusEats.setDropoff(name);
+    paintLoc(name);
     closeSheet("locSheet");
     toast("取餐地點已更新為 " + name);
   });

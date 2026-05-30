@@ -51,19 +51,21 @@
     post:   [["path", { d: "M12 5v14M5 12h14" }]],
     orders: [["path", { d: "M6 4h11l3 3v13H6zM9 4v4h7" }]],
     feed:   [["path", { d: "M4 7h16M4 12h16M4 17h16" }]],
+    earn:   [["path", { d: "M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" }]],
     me:     [["circle", { cx: 12, cy: 8, r: 4 }], ["path", { d: "M4 21a8 8 0 0 1 16 0" }]]
   };
   var TABS = {
     orderer: [
-      { key: "home",   href: "dashboard.html",  label: "首頁",   icon: ICON.home },
-      { key: "post",   href: "post-order.html", label: "發單",   icon: ICON.post },
-      { key: "orders", href: "my-orders.html",  label: "訂單",   icon: ICON.orders },
-      { key: "me",     href: "profile.html",    label: "我的",   icon: ICON.me }
+      { key: "home",   href: "dashboard.html",       label: "首頁",   icon: ICON.home },
+      { key: "post",   href: "post-order.html",      label: "發單",   icon: ICON.post },
+      { key: "orders", href: "my-orders.html",       label: "訂單",   icon: ICON.orders },
+      { key: "me",     href: "profile.html",         label: "我的",   icon: ICON.me }
     ],
     runner: [
-      { key: "home",   href: "feed.html",       label: "接單",   icon: ICON.feed },
-      { key: "orders", href: "my-orders.html",  label: "我接的", icon: ICON.orders },
-      { key: "me",     href: "profile.html",    label: "我的",   icon: ICON.me }
+      { key: "home",   href: "feed.html",            label: "接單",   icon: ICON.feed },
+      { key: "orders", href: "my-orders.html",       label: "帶單",   icon: ICON.orders },
+      { key: "earn",   href: "runner-earnings.html", label: "收入",   icon: ICON.earn },
+      { key: "me",     href: "profile.html",         label: "我的",   icon: ICON.me }
     ]
   };
 
@@ -148,7 +150,7 @@
         if (a.hasAttribute("data-no-role")) return;
         var href = a.getAttribute("href");
         if (!href || /^https?:|^#|^mailto:|^tel:/.test(href)) return;
-        if (/(^|\/)login\.html/.test(href)) return;   // login gate owns role choice
+        if (/(^|\/)login\.html/.test(href) || /(^|\/)register\.html/.test(href) || /(^|\/)landing\.html/.test(href) || /(^|\/)index\.html/.test(href)) return;   // auth gate owns role choice
         if (/[?&]role=/.test(href)) return;            // role already pinned on this link
         a.setAttribute("href", withRole(href, role));
       });
@@ -194,12 +196,23 @@
       return { qty: qty, urgency: urgency, total: this.FEE_BASE + portion + surge, parts: parts };
     },
 
+    /* ---- 取餐地點 options — shared by the home anchor + the發單 spot select.
+     * The home choice persists; 發單 defaults to it but each order can override. */
+    DROPOFFS: ["圖書館 1F 大廳", "工學院 3F 走廊", "綜合大樓 5F 實驗室"],
+    DROPOFF_KEY: "campuseats.dropoff",
+    getDropoff: function () {
+      try { return localStorage.getItem(this.DROPOFF_KEY) || this.DROPOFFS[0]; } catch (e) { return this.DROPOFFS[0]; }
+    },
+    setDropoff: function (v) { try { if (v) localStorage.setItem(this.DROPOFF_KEY, v); } catch (e) {} },
+
     /* reorder presets — "再發一次" loads the previous order back into the
-     * request form instead of starting blank (Uber Eats "Order again"). */
+     * request form instead of starting blank (Uber Eats "Order again").
+     * picks[] reference exact menu-item names so reorder repopulates the menu
+     * dropdown (not a free-text dump); custom carries only the客製 note. */
     REORDERS: {
-      mai: { restaurant: "拉亞漢堡", items: "蛋餅 ×1（不切）、紅茶微糖少冰 ×1", spot: "圖書館 1F 大廳", time: "11:30 前", note: "" },
-      wu:  { restaurant: "茶壜", items: "微糖少冰珍奶 ×1", spot: "綜合大樓 5F 實驗室", time: "14:00 前", note: "封口不要插吸管，謝謝" },
-      buf: { restaurant: "阿嬤的飯桶", items: "三菜一肉便當 ×1（不要辣）", spot: "圖書館 1F 大廳", time: "12:30 前", note: "" }
+      mai: { restaurant: "拉亞漢堡", picks: [{ name: "原味蛋餅", qty: 1 }, { name: "奶茶（中）", qty: 1 }], custom: "蛋餅不切、奶茶微糖少冰", items: "原味蛋餅 ×1、奶茶（中）×1", spot: "圖書館 1F 大廳", time: "11:30 前", note: "" },
+      wu:  { restaurant: "茶壜", picks: [{ name: "珍珠奶茶", qty: 1 }], custom: "微糖少冰", items: "珍珠奶茶 ×1", spot: "綜合大樓 5F 實驗室", time: "14:00 前", note: "封口不要插吸管，謝謝" },
+      buf: { restaurant: "阿嬤的飯桶", picks: [{ name: "三菜一肉自助餐", qty: 1 }], custom: "不要辣", items: "三菜一肉自助餐 ×1", spot: "圖書館 1F 大廳", time: "12:30 前", note: "" }
     },
 
     /* ---- campus restaurant catalogue (drives the live search) ---- */
@@ -221,6 +234,72 @@
       { name: "研三舍餐廳",       cat: "義式・鴨肉飯",   hot: false, tags: ["義大利麵", "鴨肉飯", "焗烤", "燉飯", "義式", "研三舍"] },
       { name: "7-ELEVEN",        cat: "便利商店",       hot: false, tags: ["超商", "咖啡", "御飯糰", "便當", "711", "小七"] }
     ],
+
+    /* ---- per-restaurant menus (modelled on the real shops, NT$ single-item) ----
+     * Lets the orderer pick from a dropdown instead of free-typing. Only the 5 hot
+     * restaurants carry a menu; the rest fall back to free text.
+     * Sources: 拉亞漢堡 / 漢堡王 / 茶壜 官網與外送平台菜單。 */
+    MENUS: {
+      "阿嬤的飯桶": [
+        { name: "招牌炸雞腿便當", price: 90 },
+        { name: "古早味排骨便當", price: 80 },
+        { name: "三菜一肉自助餐", price: 75 },
+        { name: "滷雞腿飯", price: 85 },
+        { name: "焢肉飯", price: 70 },
+        { name: "鯖魚便當", price: 80 },
+        { name: "燙青菜", price: 30 },
+        { name: "味噌湯", price: 15 }
+      ],
+      "拉亞漢堡": [
+        { name: "原味蛋餅", price: 35 },
+        { name: "起司厚牛美式漢堡", price: 75 },
+        { name: "松露蕈菇起司貝果", price: 79 },
+        { name: "鐵板烏龍麵＋煎餃", price: 105 },
+        { name: "奇脆 XL 勁辣炸雞芝加哥堡", price: 99 },
+        { name: "海味蝦排米堡", price: 79 },
+        { name: "厚切里肌皇后奶油吐司", price: 79 },
+        { name: "奶茶（中）", price: 30 }
+      ],
+      "和食軒丼飯": [
+        { name: "親子丼", price: 110 },
+        { name: "日式豬排丼", price: 120 },
+        { name: "唐揚雞丼", price: 110 },
+        { name: "鮭魚親子丼", price: 150 },
+        { name: "牛丼", price: 120 },
+        { name: "綜合海鮮丼", price: 180 },
+        { name: "蒲燒鰻魚丼", price: 220 },
+        { name: "茶碗蒸", price: 40 },
+        { name: "味噌湯", price: 25 }
+      ],
+      "茶壜": [
+        { name: "珍珠奶茶", price: 75 },
+        { name: "極品金萱", price: 55 },
+        { name: "天池紅茶拿鐵", price: 75 },
+        { name: "泰式奶茶", price: 80 },
+        { name: "黑糖波霸鮮奶", price: 80 },
+        { name: "雙 Q 百香綠茶", price: 75 },
+        { name: "芋圓奶茶", price: 75 },
+        { name: "金萱拿鐵", price: 75 }
+      ],
+      "漢堡王": [
+        { name: "華堡", price: 99 },
+        { name: "起司華堡", price: 109 },
+        { name: "雙層華堡", price: 139 },
+        { name: "安格斯霜降牛肉堡", price: 159 },
+        { name: "經典脆雞堡", price: 99 },
+        { name: "火烤雞腿堡", price: 99 },
+        { name: "華鱈魚堡", price: 89 },
+        { name: "黃金薯條（中）", price: 50 },
+        { name: "金黃洋蔥圈", price: 60 },
+        { name: "四塊雞塊", price: 59 },
+        { name: "可樂（中）", price: 40 }
+      ]
+    },
+    getMenu: function (name) {
+      if (!name) return null;
+      return this.MENUS[name.trim()] || null;
+    },
+
     searchRestaurants: function (q) {
       q = (q || "").trim().toLowerCase();
       if (!q) return this.RESTAURANTS.filter(function (r) { return r.hot; });
@@ -294,7 +373,32 @@
         them: { rated: false }
       }
     },
-    getOrder: function (id) { return this.ORDERS[id] || null; }
+    getOrder: function (id) { return this.ORDERS[id] || null; },
+
+    /* ---- live orderer orders, one per in-progress stage ----
+     * state index maps to the order-tracking timeline:
+     * 0 已發布 · 1 已接單 · 2 購買中 · 3 配送中 · 4 已送達 · 5 已完成 */
+    LIVE: {
+      "CE-2048": {
+        restaurant: "阿嬤的飯桶", dish: "招牌炸雞腿便當", items: "招牌炸雞腿便當 ×1",
+        spot: "圖書館 1F 大廳", deadline: "希望 12:30 前", state: 2,
+        partner: { name: "阿翔", initial: "翔", rating: "4.9", count: 32 },
+        times: ["12:02", "12:06", "12:11", null, null, null]
+      },
+      "CE-2051": {
+        restaurant: "漢堡王", dish: "華堡套餐", items: "華堡 ×1、黃金薯條（中）×1、可樂（中）×1",
+        spot: "工程三館 1F 川堂", deadline: "希望 12:00 前", state: 1,
+        partner: { name: "小妤", initial: "妤", rating: "4.8", count: 18 },
+        times: ["11:48", "11:52", null, null, null, null]
+      },
+      "CE-2056": {
+        restaurant: "拉亞漢堡", dish: "蛋餅＋奶茶", items: "原味蛋餅 ×1、奶茶（中）×1",
+        spot: "圖書館 1F 大廳", deadline: "希望 11:30 前", state: 3,
+        partner: { name: "阿哲", initial: "哲", rating: "5.0", count: 41 },
+        times: ["11:05", "11:09", "11:14", "11:21", null, null]
+      }
+    },
+    getLive: function (id) { return this.LIVE[id ? String(id).trim() : ""] || null; }
   };
 
   /* ---- brand mark ----
@@ -455,10 +559,19 @@
     var panel = document.createElement("div");
     panel.className = "rest-ac__panel"; panel.hidden = true; panel.setAttribute("role", "listbox");
     box.appendChild(panel);
-    var rows = [], active = -1;
+    var rows = [], active = -1, suppressOpen = false;
 
     function hl() { rows.forEach(function (r, i) { r.classList.toggle("is-active", i === active); }); }
-    function pick(name) { CE.pushRecent(name); input.value = name; close(); input.dispatchEvent(new Event("input", { bubbles: true })); if (opts.onSelect) opts.onSelect(name); }
+    function pick(name) {
+      CE.pushRecent(name); input.value = name;
+      // fire input so dependent UI (menu picker, fee) updates, but keep the
+      // panel from re-opening off its own input listener, then force it closed.
+      suppressOpen = true;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      suppressOpen = false;
+      close();
+      if (opts.onSelect) opts.onSelect(name);
+    }
     function close() { panel.hidden = true; active = -1; }
     function row(cls) {
       var b = document.createElement("button");
@@ -521,7 +634,7 @@
     }
 
     input.addEventListener("focus", open);
-    input.addEventListener("input", open);
+    input.addEventListener("input", function () { if (suppressOpen) return; open(); });
     input.addEventListener("blur", function () { setTimeout(close, 140); });
     input.addEventListener("keydown", function (e) {
       if (panel.hidden) { if (e.key === "ArrowDown") open(); return; }

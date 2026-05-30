@@ -255,8 +255,9 @@ p { margin: 0; text-wrap: pretty; }
 }
 .badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .badge--open    { background: var(--surface-warm); color: var(--fg); }
-.badge--matched { background: color-mix(in srgb, var(--warn) 16%, transparent); color: color-mix(in srgb, var(--warn) 50%, #000); }
+.badge--matched { background: var(--surface-warm); color: var(--fg); }
 .badge--buying  { background: color-mix(in srgb, var(--warn) 16%, transparent); color: color-mix(in srgb, var(--warn) 50%, #000); }
+.badge--delivering { background: var(--fg); color: var(--bg); }
 .badge--delivered { background: color-mix(in srgb, var(--success) 14%, transparent); color: color-mix(in srgb, var(--success) 72%, #000); }
 .badge--done    { background: color-mix(in srgb, var(--success) 14%, transparent); color: color-mix(in srgb, var(--success) 72%, #000); }
 .badge--cancelled { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }

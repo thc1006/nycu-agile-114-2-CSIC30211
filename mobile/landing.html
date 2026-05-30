@@ -50,6 +50,8 @@
   .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--space-3); }
   .block h2 { font-size: clamp(28px, 4.5vw, var(--text-3xl)); letter-spacing: -0.02em; max-width: 20ch; }
   .lead2 { color: var(--muted); font-size: var(--text-lg); margin-top: var(--space-4); max-width: 56ch; }
+  .role-k { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--meta); display:inline-block; }
+  .duo .card .btn { margin-top: var(--space-5); }
 
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8); }
   @media (max-width: 760px) { .steps { grid-template-columns: 1fr; gap: var(--space-5); } }
@@ -108,7 +110,7 @@
         <h1>沒空買飯，<br>就交給順路的同學。</h1>
         <p>CampusEats 把校園裡分散在群組的「幫忙帶餐」需求集中起來：清楚發單、即時接單、全程狀態追蹤、雙向評價。學生幫學生的互助帶餐。</p>
         <div class="cta">
-          <a class="btn btn-black btn--lg" href="login.html">開始使用</a>
+          <a class="btn btn-black btn--lg" href="register.html">開始使用</a>
           <a class="btn btn-white btn--lg" href="#how">看怎麼運作</a>
         </div>
       </div>
@@ -147,23 +149,28 @@
   <section class="block" id="roles" data-od-id="roles">
     <div class="wrap">
       <p class="eyebrow">兩種身份 · 一個帳號</p>
-      <h2>今天想訂餐還是帶餐，隨時切換。</h2>
+      <h2>你今天是要訂餐，還是要帶餐？</h2>
+      <p class="lead2">登入時選定身份，就進入專屬視角——就像 Uber Eats 與 Uber Driver 是兩個獨立 App。要切換身份，回到登入頁重新選擇即可。</p>
       <div class="duo">
         <div class="card">
-          <h3>我要訂餐</h3>
+          <span class="role-k">訂餐者</span>
+          <h3 style="margin-top:6px;">我要訂餐</h3>
           <ul>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>不離開教室或實驗室也能取得餐點</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>標準化表單，餐點與客製寫清楚</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>狀態時間軸，不必一直私訊問進度</li>
           </ul>
+          <a class="btn btn-black btn--block" href="login.html?role=orderer">以訂餐者開始</a>
         </div>
         <div class="card">
-          <h3>我要帶餐</h3>
+          <span class="role-k">帶餐者</span>
+          <h3 style="margin-top:6px;">我要帶餐</h3>
           <ul>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>在原本的路線上順手賺小額帶餐費</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>接單前看清餐廳、地點、時間、報酬</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>接單鎖定，不怕重複接到同一單</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>接單即鎖定，收入明細一目了然</li>
           </ul>
+          <a class="btn btn-white btn--block" href="login.html?role=runner">以帶餐者開始</a>
         </div>
       </div>
     </div>
@@ -192,7 +199,7 @@
     <div class="wrap">
       <h2>下一餐，找個順路的同學。</h2>
       <p>登入後選擇身份，三十秒內就能發出第一張帶餐需求。</p>
-      <a class="btn btn--lg" href="login.html">開始使用 CampusEats</a>
+      <a class="btn btn--lg" href="register.html">開始使用 CampusEats</a>
     </div>
   </section>
 
@@ -200,7 +207,7 @@
     <div class="wrap">
       <span class="brand-mark" data-brand-mark>CampusEats</span>
       <span>校園帶餐媒合平台</span>
-      <a href="login.html">開始使用 →</a>
+      <a href="register.html">開始使用 →</a>
     </div>
   </footer>
 <script src="js/campus.js"></script>
