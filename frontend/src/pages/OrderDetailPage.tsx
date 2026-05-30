@@ -7,7 +7,7 @@ const styles = [
   ".detail-grid { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: clamp(20px,3vw,36px); align-items: start; }\n  @media (max-width: 920px) { .detail-grid { grid-template-columns: 1fr; } }\n  .detail-rest { font-size: var(--text-2xl); letter-spacing: -0.02em; }\n  .items-box { background: var(--surface-warm); border-radius: var(--radius-md); padding: var(--space-4); }\n  .items-box .line { display: flex; justify-content: space-between; gap: var(--space-3); padding: 6px 0; }\n  .items-box .line span:last-child { color: var(--muted); }\n  .person { display: flex; align-items: center; gap: var(--space-3); }\n  .person .name { font-weight: 700; }\n  .rating-line { display: flex; align-items: center; gap: 5px; margin-top: 2px; font-size: var(--text-sm); }\n  .rating-line .star-ic { width: 15px; height: 15px; fill: var(--fg); flex: 0 0 auto; }\n  .cust-tag { flex: 0 0 auto; font-size: var(--text-xs); color: var(--muted); border: 1px solid var(--border-soft); border-radius: var(--radius-pill); padding: 3px 10px; }\n  .lockmsg { display: flex; align-items: center; gap: 8px; font-size: var(--text-sm); color: var(--muted); }\n  .lockmsg svg { width: 16px; height: 16px; stroke: var(--muted); stroke-width: 2; fill: none; flex: 0 0 auto; }\n  .accept-card { position: sticky; top: calc(var(--topbar-h) + 20px); }"
 ] as const
 const scripts = [
-  "var btn = document.getElementById(\"acceptBtn\");\n  var note = document.getElementById(\"lockNote\");\n  btn.addEventListener(\"click\", function () {\n    if (btn.dataset.locked === \"1\") { window.location.href = \"order-tracking.html?role=runner\"; return; }\n    if (btn.disabled) return;\n    btn.disabled = true; btn.textContent = \"鎖定訂單中…\";\n    setTimeout(function () {\n      btn.dataset.locked = \"1\"; btn.disabled = false; btn.textContent = \"✓ 接單成功 · 前往購買流程\";\n      while (note.firstChild) note.removeChild(note.firstChild);\n      note.textContent = \"訂單已鎖定為你的，點按上方按鈕開始購買流程。\";\n    }, 700);\n  });"
+  "var btn = document.getElementById(\"acceptBtn\");\n  var note = document.getElementById(\"lockNote\");\n  btn.addEventListener(\"click\", function () {\n    if (btn.dataset.locked === \"1\") { CampusEats.go(\"order-tracking.html?role=runner\"); return; }\n    if (btn.disabled) return;\n    btn.disabled = true; btn.textContent = \"鎖定訂單中…\";\n    setTimeout(function () {\n      btn.dataset.locked = \"1\"; btn.disabled = false; btn.textContent = \"✓ 接單成功 · 前往購買流程\";\n      while (note.firstChild) note.removeChild(note.firstChild);\n      note.textContent = \"訂單已鎖定為你的，點按上方按鈕開始購買流程。\";\n    }, 700);\n  });"
 ] as const
 
 export default function OrderDetailPage() {
@@ -27,9 +27,10 @@ export default function OrderDetailPage() {
             </div>
           </header>
         
-          <div className="wrap page wrap--narrow">
+          <div className="wrap page wrap--narrow" role="main" id="main">
             <div className="page__head">
               <p className="crumb"><a href="feed.html">接單</a> · 訂單詳情 · <span className="num">CE-2052</span></p>
+              <h1 className="sr-only">訂單詳情</h1>
             </div>
         
             <div className="detail-grid">

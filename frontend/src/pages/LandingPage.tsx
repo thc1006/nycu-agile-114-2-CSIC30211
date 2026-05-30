@@ -29,6 +29,7 @@ export default function LandingPage() {
             </div>
           </header>
         
+          <main id="main">
           <section className="hero" data-od-id="hero">
             <div className="wrap hero__inner">
               <div>
@@ -128,6 +129,7 @@ export default function LandingPage() {
             </div>
           </section>
         
+          </main>
           <footer className="foot" data-od-id="footer">
             <div className="wrap foot__inner">
               <span className="topbar__brand" data-brand-mark="">CampusEats</span>

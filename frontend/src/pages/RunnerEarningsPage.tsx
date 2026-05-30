@@ -22,7 +22,7 @@ export default function RunnerEarningsPage() {
             </div>
           </header>
         
-          <div className="wrap page">
+          <div className="wrap page" role="main" id="main">
             <div className="page__head"><p className="crumb"><a href="profile.html">我的</a> · 收入明細</p><h1>收入明細</h1></div>
         
             <div className="earn-grid">

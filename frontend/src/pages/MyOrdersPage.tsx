@@ -27,7 +27,7 @@ export default function MyOrdersPage() {
             </div>
           </header>
         
-          <div className="wrap page">
+          <div className="wrap page" role="main" id="main">
             <div className="page__head"><h1 id="pageTitle">我的訂單</h1></div>
         
             <div className="seg-tabs" id="tabs">

@@ -27,7 +27,7 @@ export default function DashboardPage() {
             </div>
           </header>
         
-          <div className="wrap page">
+          <div className="wrap page" role="main" id="main">
             <div className="page__head">
               <button className="loc" id="locBtn" aria-label="變更取餐地點">
                 <svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>

@@ -22,7 +22,7 @@ export default function OrdererReviewsPage() {
             </div>
           </header>
         
-          <div className="wrap page">
+          <div className="wrap page" role="main" id="main">
             <div className="page__head"><p className="crumb"><a href="profile.html">我的</a> · 我的評價</p><h1>我的評價</h1></div>
         
             <div className="rev-grid">

@@ -34,6 +34,7 @@ export default function IndexPage() {
             </div>
           </header>
         
+          <main id="main">
           <section className="group">
             <div className="wrap">
               <p className="eyebrow">入口流程</p>
@@ -87,6 +88,7 @@ export default function IndexPage() {
             </div>
           </section>
         
+          </main>
           <footer className="foot">
             <div className="wrap">
               <span>CampusEats · 校園帶餐媒合平台</span>
