@@ -46,8 +46,11 @@ fi
 if command -v docker >/dev/null 2>&1; then
   echo "No local venv/Redis detected — running tests in Docker..."
 
-  NET="campuseats-prepush-net"
-  RDS="campuseats-prepush-redis"
+  # Per-run unique names ($$ = this shell's PID) so two concurrent pushes
+  # (e.g. from two worktrees/terminals) don't force-remove each other's
+  # container mid-test. Cleanup below is scoped to these same names.
+  NET="campuseats-prepush-net-$$"
+  RDS="campuseats-prepush-redis-$$"
   # 'pwd -W' yields a Windows path (C:/...) under Git Bash; falls back to a
   # POSIX path on macOS/Linux. Needed so the Docker volume mount resolves.
   HOSTDIR="$(pwd -W 2>/dev/null || pwd)"
