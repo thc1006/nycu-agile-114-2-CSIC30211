@@ -9,6 +9,9 @@ This backend currently supports:
 * AG-002: Create order
 * AG-003: List open orders
 * AG-004: Accept order with basic concurrency protection
+* AG-005: Update order status (start buying / mark delivered)
+* AG-006: Confirm receipt
+* AG-007: Two-way star rating with per-user aggregate
 
 ---
 
@@ -22,6 +25,9 @@ This backend currently supports:
 * Create order
 * List open orders
 * Accept order
+* Update order status (start buying / mark delivered)
+* Confirm receipt
+* Two-way star rating (1-5) with per-user aggregate
 * Automated API tests with pytest
 * Git pre-push hook to block push if tests fail
 
@@ -368,6 +374,66 @@ After accepting the order, the order should disappear from `/orders/open`.
 
 ---
 
+### 8. Update status: start buying (runner)
+
+```bash
+curl -X POST http://127.0.0.1:8000/orders/ORDER_ID/start \
+  -H "Authorization: Bearer RUNNER_TOKEN"
+```
+
+`status` becomes `BUYING`.
+
+---
+
+### 9. Update status: mark delivered (runner)
+
+```bash
+curl -X POST http://127.0.0.1:8000/orders/ORDER_ID/deliver \
+  -H "Authorization: Bearer RUNNER_TOKEN"
+```
+
+`status` becomes `DELIVERED`. Transitions are forward-only: skipping a step
+(e.g. accept then deliver) returns `409`.
+
+---
+
+### 10. Confirm receipt (buyer)
+
+```bash
+curl -X POST http://127.0.0.1:8000/orders/ORDER_ID/confirm \
+  -H "Authorization: Bearer BUYER_TOKEN"
+```
+
+`status` becomes `COMPLETED`. Only the orderer can confirm; only the runner can
+`start` / `deliver` (otherwise `403`).
+
+---
+
+### 11. Rate the order (each party once)
+
+```bash
+curl -X POST http://127.0.0.1:8000/orders/ORDER_ID/ratings \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer BUYER_TOKEN" \
+  -d '{ "stars": 5 }'
+```
+
+Only after `COMPLETED`; the runner rates back with `RUNNER_TOKEN`. Each
+participant may rate once, ratings are immutable, and `stars` must be 1-5.
+
+---
+
+### 12. View a user's aggregate rating
+
+```bash
+curl http://127.0.0.1:8000/users/USER_ID/rating \
+  -H "Authorization: Bearer ANY_TOKEN"
+```
+
+Returns e.g. `{ "user_id": "u_...", "average": 5.0, "count": 1 }`.
+
+---
+
 ## Automated Tests
 
 This project uses `pytest` for automated API testing.
@@ -388,6 +454,12 @@ The tests cover:
 * Reject accepting own order
 * Reject accepting the same order twice
 * Remove accepted order from open order list
+* Update status: start buying / mark delivered (runner only)
+* Reject illegal / skipped status transitions and updates on terminal orders
+* Confirm receipt (orderer only)
+* Two-way rating after completion (1-5, once per user, immutable)
+* Reject rating before completion or by non-participants
+* Per-user rating aggregate (average + count)
 
 The tests use Redis DB 15 to avoid modifying development data in Redis DB 0.
 
@@ -412,7 +484,7 @@ python -m pytest -q
 Expected result:
 
 ```text
-15 passed
+35 passed
 ```
 
 Warnings may appear, but they do not mean the tests failed. The important part is that all tests pass.
@@ -493,7 +565,7 @@ zsh: permission denied: ./scripts/run-tests.sh
 Expected result:
 
 ```text
-15 passed
+35 passed
 ```
 
 ---
@@ -563,6 +635,9 @@ python -m pytest -q
 | AG-002 | 發布訂單                     | P0       | Sprint 1 | M        | Done   |
 | AG-003 | 瀏覽待接訂單列表                 | P0       | Sprint 1 | S        | Done   |
 | AG-004 | 接單                       | P0       | Sprint 2 | M        | Done   |
+| AG-005 | 更新訂單狀態                   | P0       | Sprint 2 | M        | Done   |
+| AG-006 | 確認收餐                     | P0       | Sprint 3 | S        | Done   |
+| AG-007 | 雙向評價                     | P1       | Sprint 3 | M        | Done   |
 
 ---
 

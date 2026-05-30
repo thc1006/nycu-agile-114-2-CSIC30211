@@ -46,3 +46,21 @@ class OpenOrderResponse(BaseModel):
     expected_time: datetime
     delivery_fee: int
     status: OrderStatus
+
+
+class RateOrderRequest(BaseModel):
+    stars: int = Field(..., ge=1, le=5)
+
+
+class RatingResponse(BaseModel):
+    order_id: str
+    rater_id: str
+    ratee_id: str
+    stars: int
+    created_at: datetime
+
+
+class UserRatingResponse(BaseModel):
+    user_id: str
+    average: float
+    count: int
