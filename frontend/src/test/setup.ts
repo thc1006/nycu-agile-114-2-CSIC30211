@@ -15,6 +15,9 @@ afterEach(() => {
   localStorage.clear()
   document.body.removeAttribute('data-od-id')
   document.body.className = ''
+  // renderWithRouter mirrors each test's route onto window.location; reset it so
+  // a route (e.g. ?id=) does not leak into the next test's legacy scripts.
+  window.history.replaceState({}, '', '/')
 })
 
 // Lightweight accessibility matcher backed by axe-core. (The dedicated

@@ -17,6 +17,12 @@ export function renderWithRouter(
   ui: ReactElement,
   { route = '/', path = '*' }: RenderOptions = {},
 ) {
+  // Legacy inline scripts (and campus-web.js) read the REAL `window.location`,
+  // which MemoryRouter does not control. Mirror the route onto window.location so
+  // those scripts see the same `?role=`/`?id=` they would in the browser — without
+  // this, e.g. HistoryDetailPage's owner-guard sees no id, redirects, and (under
+  // the wildcard `path="*"`) re-mounts itself in an infinite navigation loop.
+  window.history.replaceState({}, '', route)
   return render(
     <MemoryRouter initialEntries={[route]}>
       <Routes>
