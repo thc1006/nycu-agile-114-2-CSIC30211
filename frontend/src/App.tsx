@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router'
+import { ErrorBoundary } from './ErrorBoundary'
 import DashboardPage from './pages/DashboardPage'
 import FeedPage from './pages/FeedPage'
 import HistoryDetailPage from './pages/HistoryDetailPage'
@@ -37,24 +38,26 @@ const routes = [
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<IndexPage />} />
-      <Route path="/index" element={<IndexPage />} />
-      <Route path="/index.html" element={<IndexPage />} />
+    <ErrorBoundary>
+      <Routes>
+        <Route path="/" element={<IndexPage />} />
+        <Route path="/index" element={<IndexPage />} />
+        <Route path="/index.html" element={<IndexPage />} />
 
-      {routes
-        .filter(({ id }) => id !== 'index')
-        .map(({ id, Component }) => (
-          <Route key={id} path={`/${id}`} element={<Component />} />
-        ))}
+        {routes
+          .filter(({ id }) => id !== 'index')
+          .map(({ id, Component }) => (
+            <Route key={id} path={`/${id}`} element={<Component />} />
+          ))}
 
-      {routes
-        .filter(({ id }) => id !== 'index')
-        .map(({ id, Component }) => (
-          <Route key={`${id}.html`} path={`/${id}.html`} element={<Component />} />
-        ))}
+        {routes
+          .filter(({ id }) => id !== 'index')
+          .map(({ id, Component }) => (
+            <Route key={`${id}.html`} path={`/${id}.html`} element={<Component />} />
+          ))}
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ErrorBoundary>
   )
 }

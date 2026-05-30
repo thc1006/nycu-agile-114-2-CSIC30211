@@ -72,9 +72,17 @@
       return href + (href.indexOf("?") === -1 ? "?" : "&") + "role=" + r;
     },
     home: function (r) { r = normRole(r || this.getRole()); return (r === "runner" ? "feed.html" : "dashboard.html") + "?role=" + r; },
+    /* SPA-aware navigation. When mounted inside the React wrapper, window.__campusNavigate
+     * routes through react-router (no full reload); standalone it falls back to a
+     * real document navigation so the legacy prototype still works on its own. */
+    go: function (href, opts) {
+      var nav = (typeof window !== "undefined") && window.__campusNavigate;
+      if (typeof nav === "function") { nav(href, opts); return; }
+      if (opts && opts.replace) { location.replace(href); } else { location.href = href; }
+    },
     guard: function (allowed) {
       var r = this.getRole();
-      if (allowed && allowed !== "any" && r !== allowed) { location.replace(this.home(r)); return false; }
+      if (allowed && allowed !== "any" && r !== allowed) { this.go(this.home(r), { replace: true }); return false; }
       return true;
     },
 
@@ -359,7 +367,18 @@
   window.CampusEats.mountBrandMarks = mountBrandMarks;
 
   /* ---- toast ---- */
-  function ensureWrap() { var w = document.querySelector(".toast-wrap"); if (!w) { w = document.createElement("div"); w.className = "toast-wrap"; document.body.appendChild(w); } return w; }
+  function ensureWrap() {
+    var w = document.querySelector(".toast-wrap");
+    if (!w) {
+      w = document.createElement("div");
+      w.className = "toast-wrap";
+      // Announce transient status messages to assistive tech (WCAG 4.1.3).
+      w.setAttribute("role", "status");
+      w.setAttribute("aria-live", "polite");
+      document.body.appendChild(w);
+    }
+    return w;
+  }
   window.toast = function (msg, opts) {
     opts = opts || {};
     var w = ensureWrap();
@@ -371,41 +390,114 @@
     setTimeout(function () { t.classList.remove("is-in"); setTimeout(function () { t.remove(); }, 250); }, opts.duration || 2200);
   };
 
-  /* ---- centered dialog (the mobile bottom-sheet, restyled by CSS) ---- */
+  /* ---- centered dialog (the mobile bottom-sheet, restyled by CSS) ----
+   * aria-modal dialogs must move focus in, trap Tab while open, and restore
+   * focus to the trigger on close (WCAG 2.4.3 / 4.1.2). */
+  var FOCUSABLE_SEL = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  function focusablesIn(el) {
+    return Array.prototype.slice.call(el.querySelectorAll(FOCUSABLE_SEL)).filter(function (n) {
+      return !n.hidden && n.getAttribute("aria-hidden") !== "true";
+    });
+  }
+  function makeTrap(container) {
+    return function (e) {
+      if (e.key !== "Tab") return;
+      var f = focusablesIn(container);
+      if (!f.length) { e.preventDefault(); return; }
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === container)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+  }
   window.openSheet = function (id) {
     var sheet = document.getElementById(id); if (!sheet) return;
     var scrim = document.querySelector(".scrim");
     if (!scrim) { scrim = document.createElement("div"); scrim.className = "scrim"; document.body.appendChild(scrim); }
     scrim.classList.add("is-open"); sheet.classList.add("is-open");
     scrim.onclick = function () { window.closeSheet(id); };
+    // remember the trigger, move focus into the dialog, trap Tab inside it
+    sheet.__lastFocus = document.activeElement;
+    sheet.setAttribute("tabindex", "-1");
+    var f = focusablesIn(sheet);
+    (f[0] || sheet).focus();
+    sheet.__trap = makeTrap(sheet);
+    sheet.addEventListener("keydown", sheet.__trap);
   };
   window.closeSheet = function (id) {
     var sheet = document.getElementById(id); var scrim = document.querySelector(".scrim");
-    if (sheet) sheet.classList.remove("is-open"); if (scrim) scrim.classList.remove("is-open");
+    if (sheet) {
+      sheet.classList.remove("is-open");
+      if (sheet.__trap) { sheet.removeEventListener("keydown", sheet.__trap); sheet.__trap = null; }
+      var prev = sheet.__lastFocus; sheet.__lastFocus = null;
+      if (prev && typeof prev.focus === "function") prev.focus();
+    }
+    if (scrim) scrim.classList.remove("is-open");
   };
 
-  /* ---- star rating widget ---- */
+  /* ---- star rating widget ----
+   * Interactive instances are an ARIA radiogroup (role=radio + aria-checked,
+   * roving tabindex, arrow-key support). Read-only instances are a single
+   * labelled image so screen readers hear "N 顆星，共 M 顆" instead of M buttons. */
+  var STAR_D = "M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.2 6.1 21.3l1.2-6.6L2.5 9l6.6-.9z";
   function buildStars(el) {
     var max = parseInt(el.getAttribute("data-max") || "5", 10);
     var value = parseInt(el.getAttribute("data-value") || "0", 10);
     var readonly = el.hasAttribute("data-readonly");
-    if (readonly) el.classList.add("stars--static");
-    var STAR_D = "M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.2 6.1 21.3l1.2-6.6L2.5 9l6.6-.9z";
     while (el.firstChild) el.removeChild(el.firstChild);
+
+    if (readonly) {
+      el.classList.add("stars--static");
+      el.setAttribute("role", "img");
+      el.setAttribute("aria-label", value + " 顆星，共 " + max + " 顆");
+      for (var r = 1; r <= max; r++) {
+        var span = document.createElement("span");
+        span.className = "star" + (r <= value ? " is-on" : "");
+        span.setAttribute("aria-hidden", "true");
+        span.appendChild(svgIcon("0 0 24 24", [STAR_D], { sw: "1.5" }));
+        el.appendChild(span);
+      }
+      return;
+    }
+
+    el.setAttribute("role", "radiogroup");
+    if (!el.getAttribute("aria-label")) el.setAttribute("aria-label", "評分");
+    function paint(v) {
+      el.querySelectorAll(".star").forEach(function (s) {
+        var sv = parseInt(s.dataset.v, 10);
+        s.classList.toggle("is-on", sv <= v);
+        s.setAttribute("aria-checked", sv === v ? "true" : "false");
+        s.tabIndex = sv === (v || 1) ? 0 : -1;
+      });
+    }
+    function select(v, moveFocus) {
+      value = v; el.setAttribute("data-value", value); paint(value);
+      el.dispatchEvent(new CustomEvent("rate", { detail: value }));
+      if (moveFocus) { var t = el.querySelector('.star[data-v="' + value + '"]'); if (t) t.focus(); }
+    }
     for (var i = 1; i <= max; i++) {
       var b = document.createElement("button");
       b.type = "button"; b.className = "star" + (i <= value ? " is-on" : "");
-      b.setAttribute("aria-label", i + " 星"); b.dataset.v = i;
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-label", i + " 星");
+      b.setAttribute("aria-checked", i === value ? "true" : "false");
+      b.dataset.v = i;
+      b.tabIndex = i === (value || 1) ? 0 : -1;
       b.appendChild(svgIcon("0 0 24 24", [STAR_D], { sw: "1.5" }));
       el.appendChild(b);
     }
-    if (readonly) return;
     el.addEventListener("click", function (e) {
       var btn = e.target.closest(".star"); if (!btn) return;
-      value = parseInt(btn.dataset.v, 10);
-      el.setAttribute("data-value", value);
-      el.querySelectorAll(".star").forEach(function (s) { s.classList.toggle("is-on", parseInt(s.dataset.v, 10) <= value); });
-      el.dispatchEvent(new CustomEvent("rate", { detail: value }));
+      select(parseInt(btn.dataset.v, 10), false);
+    });
+    el.addEventListener("keydown", function (e) {
+      var cur = value || 1, nv = null;
+      if (e.key === "ArrowRight" || e.key === "ArrowUp") nv = Math.min(max, cur + 1);
+      else if (e.key === "ArrowLeft" || e.key === "ArrowDown") nv = Math.max(1, cur - 1);
+      else if (e.key === "Home") nv = 1;
+      else if (e.key === "End") nv = max;
+      else return;
+      e.preventDefault();
+      select(nv, true);
     });
   }
   window.CampusEats.buildStars = buildStars;
@@ -415,6 +507,7 @@
   var STORE_SHAPES = [["path", { d: STORE_ICON[0] }]];
   var SEARCH_ICON = [["circle", { cx: 11, cy: 11, r: 7 }], ["path", { d: "M21 21l-4-4" }]];
   var CLOCK_ICON = [["circle", { cx: 12, cy: 12, r: 9 }], ["path", { d: "M12 7v5l3.5 2" }]];
+  var acSeq = 0;
   function mountRestaurantSearch(input, opts) {
     if (!input || input.dataset.acReady) return;
     input.dataset.acReady = "1";
@@ -423,12 +516,25 @@
     var CE = window.CampusEats;
     var box = opts.container || input.parentNode;
     box.classList.add("rest-ac");
+    var panelId = "rest-ac-panel-" + (++acSeq);
     var panel = document.createElement("div");
-    panel.className = "rest-ac__panel"; panel.hidden = true; panel.setAttribute("role", "listbox");
+    panel.className = "rest-ac__panel"; panel.hidden = true; panel.id = panelId; panel.setAttribute("role", "listbox");
     box.appendChild(panel);
+    // combobox wiring so screen readers announce open/closed + the active option (WCAG 4.1.2)
+    input.setAttribute("role", "combobox");
+    input.setAttribute("aria-autocomplete", "list");
+    input.setAttribute("aria-expanded", "false");
+    input.setAttribute("aria-controls", panelId);
     var rows = [], active = -1, suppressOpen = false;
 
-    function hl() { rows.forEach(function (r, i) { r.classList.toggle("is-active", i === active); }); }
+    function hl() {
+      rows.forEach(function (r, i) {
+        r.classList.toggle("is-active", i === active);
+        if (i === active && !r.id) r.id = panelId + "-opt-" + i;
+      });
+      if (active >= 0 && rows[active]) input.setAttribute("aria-activedescendant", rows[active].id);
+      else input.removeAttribute("aria-activedescendant");
+    }
     function pick(name) {
       CE.pushRecent(name); input.value = name;
       // fire input so dependent UI (menu picker, fee) updates, but keep the
@@ -439,7 +545,7 @@
       close();
       if (opts.onSelect) opts.onSelect(name);
     }
-    function close() { panel.hidden = true; active = -1; }
+    function close() { panel.hidden = true; active = -1; input.setAttribute("aria-expanded", "false"); input.removeAttribute("aria-activedescendant"); }
     function row(cls) {
       var b = document.createElement("button");
       b.type = "button"; b.className = "rest-ac__opt" + (cls ? " " + cls : ""); b.setAttribute("role", "option");
@@ -498,13 +604,14 @@
         }
       }
       panel.hidden = rows.length === 0;
+      input.setAttribute("aria-expanded", panel.hidden ? "false" : "true");
     }
 
     input.addEventListener("focus", open);
     input.addEventListener("input", function () { if (suppressOpen) return; open(); });
     input.addEventListener("blur", function () { setTimeout(close, 140); });
     input.addEventListener("keydown", function (e) {
-      if (panel.hidden) { if (e.key === "ArrowDown") open(); return; }
+      if (panel.hidden) { if (e.key === "ArrowDown") { e.preventDefault(); open(); if (rows.length) { active = 0; hl(); } } return; }
       if (e.key === "ArrowDown") { e.preventDefault(); active = Math.min(active + 1, rows.length - 1); hl(); }
       else if (e.key === "ArrowUp") { e.preventDefault(); active = Math.max(active - 1, 0); hl(); }
       else if (e.key === "Enter" && active >= 0) { e.preventDefault(); rows[active].click(); }
@@ -519,7 +626,7 @@
       mountRestaurantSearch(input, {
         container: box,
         onSelect: function (name) {
-          if (mode === "navigate") location.href = window.CampusEats.withRole("post-order.html?restaurant=" + encodeURIComponent(name));
+          if (mode === "navigate") window.CampusEats.go(window.CampusEats.withRole("post-order.html?restaurant=" + encodeURIComponent(name)));
         }
       });
     });

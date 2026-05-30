@@ -16,6 +16,11 @@ const pageRoleGuard: Partial<Record<PageId, Role>> = {
   'runner-reviews': 'runner',
 }
 
+// Marketing/entry pages already render their own <footer class="foot">. Adding
+// the shared app footer there would create a second contentinfo landmark, so
+// they opt out and the rest of the app gets the shared footer.
+const pagesWithOwnFooter = new Set<PageId>(['index', 'landing'])
+
 function normalizeRole(value: string | null): Role {
   return value === 'runner' ? 'runner' : 'orderer'
 }
@@ -23,10 +28,25 @@ function normalizeRole(value: string | null): Role {
 function syncRoleFromLocation(search: string): Role {
   const params = new URLSearchParams(search)
   const roleFromUrl = params.get('role')
-  const role = normalizeRole(roleFromUrl ?? localStorage.getItem(ROLE_KEY))
+
+  // localStorage can throw (Safari private mode, disabled storage, quota). The
+  // legacy runtime guards every access; mirror that here so the guard effect
+  // never crashes the page over an unavailable store.
+  let stored: string | null = null
+  try {
+    stored = localStorage.getItem(ROLE_KEY)
+  } catch {
+    stored = null
+  }
+
+  const role = normalizeRole(roleFromUrl ?? stored)
 
   if (roleFromUrl === 'runner' || roleFromUrl === 'orderer') {
-    localStorage.setItem(ROLE_KEY, role)
+    try {
+      localStorage.setItem(ROLE_KEY, role)
+    } catch {
+      // Storage unavailable — role still resolves for this navigation.
+    }
   }
 
   return role
@@ -101,6 +121,20 @@ export function PageChrome({ pageId, title, bodyAttrs, scripts = [], children }:
   useLegacyLinks(rootRef, renderKey)
 
   useEffect(() => {
+    // Install the SPA navigation hook before any legacy code runs so imperative
+    // navigations (CampusEats.go / guard / search-select / page CTAs) route
+    // through react-router instead of forcing a full document reload.
+    window.__campusNavigate = (href, opts) => {
+      const clientPath = clientPathFromLegacyHref(href)
+      if (clientPath) {
+        navigate(clientPath, opts?.replace ? { replace: true } : undefined)
+      } else if (opts?.replace) {
+        window.location.replace(href)
+      } else {
+        window.location.href = href
+      }
+    }
+
     const role = syncRoleFromLocation(location.search)
     const requiredRole = pageRoleGuard[pageId]
 
@@ -112,7 +146,16 @@ export function PageChrome({ pageId, title, bodyAttrs, scripts = [], children }:
     document.title = title
     applyBodyAttributes(bodyAttrs)
     removeLegacyChrome()
-    runCampusInit()
+
+    // The legacy runtime and each page's inline scripts run via Function(). A
+    // throw here (e.g. a renamed element id, storage failure) must not blank the
+    // whole SPA — the JSX is already rendered, so we degrade to static content
+    // and surface the error rather than letting it escape the effect.
+    try {
+      runCampusInit()
+    } catch (err) {
+      console.error(`[CampusEats] runtime init failed on "${pageId}":`, err)
+    }
 
     // Execute each page's legacy inline scripts exactly once per mounted route
     // instance (keyed by renderKey, which the root <div> below is also keyed on).
@@ -120,9 +163,15 @@ export function PageChrome({ pageId, title, bodyAttrs, scripts = [], children }:
     // navigation re-runs this effect without remounting the route container.
     // Without this guard, append-style scripts (timeline steps, rating tags,
     // reputation cells) would duplicate their injected DOM and stack listeners.
+    // The key is marked BEFORE executing so a throwing script is never retried
+    // (which would duplicate the side effects it ran before the throw).
     if (scriptsRanForKey.current !== renderKey) {
-      executeInlineScripts(pageId, scripts)
       scriptsRanForKey.current = renderKey
+      try {
+        executeInlineScripts(pageId, scripts)
+      } catch (err) {
+        console.error(`[CampusEats] inline script failed on "${pageId}":`, err)
+      }
     }
 
     if (location.hash) {
@@ -136,8 +185,26 @@ export function PageChrome({ pageId, title, bodyAttrs, scripts = [], children }:
   }, [bodyAttrs, location.hash, location.key, location.search, navigate, pageId, renderKey, scripts, title])
 
   return (
-    <div key={renderKey} ref={rootRef} data-react-route={routePathForPage(pageId)}>
+    <div key={renderKey} ref={rootRef} className="app-shell" data-react-route={routePathForPage(pageId)}>
+      <a className="skip-link" href="#main">跳到主要內容</a>
       {children}
+      {!pagesWithOwnFooter.has(pageId) && (
+        <footer className="site-footer">
+          <div className="site-footer__inner">
+            <div className="site-footer__brand">
+              <span className="site-footer__mark">CampusEats</span>
+              <span className="site-footer__tag">校園帶餐媒合 · 順路的同學幫你帶</span>
+            </div>
+            <nav className="site-footer__nav" aria-label="頁尾連結">
+              <button type="button" onClick={(event) => event.preventDefault()}>關於我們</button>
+              <button type="button" onClick={(event) => event.preventDefault()}>使用條款</button>
+              <button type="button" onClick={(event) => event.preventDefault()}>隱私權政策</button>
+              <button type="button" onClick={(event) => event.preventDefault()}>意見回饋</button>
+            </nav>
+            <div className="site-footer__copy">© 2026 CampusEats</div>
+          </div>
+        </footer>
+      )}
     </div>
   )
 }

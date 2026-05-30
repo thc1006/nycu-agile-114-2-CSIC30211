@@ -18,7 +18,10 @@
   --fg:   #000000;
   --fg-2: #000000;
   --muted: #4b4b4b;
-  --meta:  #afafaf;
+  /* #6e6e6e clears WCAG AA (4.5:1) on BOTH white and the --surface-warm (#f8f8f8)
+   * footer/badge backgrounds this token sits on (~5.1:1 / ~4.8:1); the original
+   * #afafaf was ~2.3:1, and a white-only #767676 dipped to ~4.3:1 on #f8f8f8. */
+  --meta:  #6e6e6e;
 
   /* ─── Border ───────────────────────────────────────────────────── */
   --border:      #000000;
@@ -115,6 +118,31 @@ p { margin: 0; text-wrap: pretty; }
 :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 [hidden] { display: none !important; }
 
+/* Respect users who ask for less motion (WCAG 2.3.3): near-instant transitions,
+ * no scale/slide animations, no smooth-scroll. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* a11y utilities */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: fixed; top: 8px; left: 8px; z-index: 200;
+  padding: 10px 16px; background: var(--fg); color: var(--bg);
+  border-radius: var(--radius-md); font-weight: 600;
+  transform: translateY(-160%); transition: transform var(--motion-fast);
+}
+.skip-link:focus { transform: translateY(0); }
+
 /* ─── web container ─────────────────────────────────────────────── */
 .wrap { width: 100%; max-width: var(--container-max); margin-inline: auto; padding-inline: var(--gutter); }
 .wrap--narrow { max-width: 880px; }
@@ -122,7 +150,9 @@ p { margin: 0; text-wrap: pretty; }
 /* ─── top navigation (web app shell) ────────────────────────────── */
 .topbar {
   position: sticky; top: 0; z-index: 40;
+  background: var(--bg); /* solid fallback where color-mix() is unsupported (Safari < 16.2) */
   background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border-soft);
 }
@@ -154,6 +184,28 @@ p { margin: 0; text-wrap: pretty; }
 .topbar__account .nm { font-size: var(--text-sm); font-weight: 600; }
 .topbar__burger { display: none; width: 42px; height: 42px; border: none; background: transparent; border-radius: 50%; place-items: center; }
 .topbar__burger svg { width: 24px; height: 24px; stroke: var(--fg); stroke-width: 2; fill: none; }
+
+/* ─── app shell + footer ────────────────────────────────────────── */
+/* Each route is a min-height column so short pages (e.g. dashboard) still
+   anchor the footer at the bottom instead of leaving a blank gap below. */
+.app-shell { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+.site-footer { margin-top: auto; border-top: 1px solid var(--border-soft); background: var(--surface-warm); }
+.site-footer__inner {
+  width: 100%; max-width: var(--container-max); margin-inline: auto;
+  padding: var(--space-6) var(--gutter);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4) var(--space-6);
+}
+.site-footer__brand { display: flex; flex-direction: column; gap: 2px; }
+.site-footer__mark { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); letter-spacing: -0.02em; }
+.site-footer__tag { font-size: var(--text-xs); color: var(--meta); }
+.site-footer__nav { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-left: auto; }
+.site-footer__nav a, .site-footer__nav button { background: none; border: 0; padding: 0; font: inherit; font-size: var(--text-sm); color: var(--muted); cursor: pointer; transition: color var(--motion-fast); }
+.site-footer__nav a:hover, .site-footer__nav button:hover { color: var(--fg); }
+.site-footer__copy { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--meta); }
+@media (max-width: 760px) {
+  .site-footer__inner { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+  .site-footer__nav { margin-left: 0; }
+}
 
 /* ─── page scaffold ─────────────────────────────────────────────── */
 .page { padding-block: clamp(24px, 4vw, 44px) clamp(64px, 8vw, 96px); }
@@ -364,7 +416,7 @@ select.control { appearance: none; background-image: url("data:image/svg+xml;utf
   padding: var(--space-6); box-shadow: var(--elev-raised);
   opacity: 0; pointer-events: none;
   transition: transform var(--motion-base) var(--ease-standard), opacity var(--motion-base);
-  max-height: 86dvh; overflow-y: auto;
+  max-height: 86vh; max-height: 86dvh; overflow-y: auto;
 }
 .sheet.is-open { transform: translate(-50%, -50%); opacity: 1; pointer-events: auto; }
 .sheet__grip { display: none; }
@@ -400,7 +452,9 @@ select.control { appearance: none; background-image: url("data:image/svg+xml;utf
   .topbar__nav.is-bottom {
     display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
     margin: 0; padding: 6px max(8px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom));
-    background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(12px);
+    background: var(--bg);
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
     border-top: 1px solid var(--border-soft); justify-content: space-around;
   }
   .topbar__nav.is-bottom a { flex-direction: column; gap: 3px; padding: 6px 10px; font-size: 11px; border-radius: var(--radius-md); }
