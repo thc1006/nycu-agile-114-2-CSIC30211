@@ -60,6 +60,25 @@ cd frontend
 npm run build
 ```
 
+## Production deployment notes
+
+The build in `frontend/dist` is a single-page app served from `index.html`.
+Two host requirements matter for the backend/integration teams:
+
+1. **SPA history fallback (required).** Any unknown path must serve
+   `index.html` so deep links (`/feed`, `/post-order`) and legacy `.html`
+   links (`/dashboard.html`) resolve through React Router. `frontend/public/_redirects`
+   covers Netlify / Cloudflare Pages automatically. For nginx use
+   `try_files $uri $uri/ /index.html;`; for Vercel add a catch-all rewrite to
+   `/index.html`. Without this, refreshing a deep link 404s. In-app navigation
+   already stays client-side (no full reloads) via the `CampusEats.go` →
+   `window.__campusNavigate` hook installed by `PageChrome`.
+2. **Content-Security-Policy.** The shared legacy runtime and each page's inline
+   scripts execute via `Function()` (a deliberate wrapper around the original
+   `campus-web.js`), so a strict CSP must allow `script-src 'unsafe-eval'`, or
+   the app will not boot. If a stricter CSP is required, the legacy runtime must
+   first be ported to an ES module (tracked as future work).
+
 ## Quality checks (lint, types, tests)
 
 All checks run from `./frontend` and mirror what CI enforces:

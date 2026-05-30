@@ -1,0 +1,5 @@
+# SPA history fallback — serve index.html for any client route so deep links
+# (e.g. /feed, /post-order, legacy /dashboard.html) and page refreshes resolve
+# through React Router instead of 404ing. Honoured by Netlify and Cloudflare
+# Pages; other hosts need the equivalent rule (see frontend/README — Deployment).
+/*    /index.html   200
