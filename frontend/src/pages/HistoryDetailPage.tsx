@@ -55,7 +55,7 @@ export default function HistoryDetailPage() {
                   <p className="sec-label">評價紀錄</p>
                   <div className="card">
                     <div className="rate-block">
-                      <div className="rb-head"><span className="rb-who" id="hdYouLabel">你給對方的評價</span><a className="link-cta" id="hdYouCta" hidden href="#">前往評價</a></div>
+                      <div className="rb-head"><span className="rb-who" id="hdYouLabel">你給對方的評價</span><a className="link-cta" id="hdYouCta" hidden href="rating.html">前往評價</a></div>
                       <div id="hdYouRated" hidden>
                         <span className="stars stars--static" data-stars="" data-readonly="" data-value="0" data-max="5" id="hdYouStars"></span>
                         <div className="rb-tags" id="hdYouTags" hidden></div>
@@ -96,7 +96,7 @@ export default function HistoryDetailPage() {
                   <span className="fee-big" id="hdFee">$0</span>
                   <p className="body-sm" style={{ marginTop: "var(--space-2)" }}>由系統依距離、餐點份量與時段固定計算，下單前已確認，雙方不另議價。</p>
                 </div>
-                <div id="hdActionbar" hidden><a className="btn btn-black btn--block btn--lg" id="hdAction" href="#">—</a></div>
+                <div id="hdActionbar" hidden><a className="btn btn-black btn--block btn--lg" id="hdAction" href="rating.html">—</a></div>
               </aside>
             </div>
           </div>

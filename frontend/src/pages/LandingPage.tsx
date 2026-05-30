@@ -29,7 +29,7 @@ export default function LandingPage() {
             </div>
           </header>
         
-          <header className="hero" data-od-id="hero">
+          <section className="hero" data-od-id="hero">
             <div className="wrap hero__inner">
               <div>
                 <h1>沒空買飯，<br />就交給順路的同學。</h1>
@@ -57,7 +57,7 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-          </header>
+          </section>
         
           <section className="block" id="how" data-od-id="how">
             <div className="wrap">

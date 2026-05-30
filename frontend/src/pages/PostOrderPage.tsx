@@ -107,7 +107,7 @@ export default function PostOrderPage() {
               <aside className="aside-fee">
                 <div className="card stack-4">
                   <div>
-                    <label style={{ fontSize: "var(--text-sm)", fontWeight: "600" }}>帶餐費<span style={{ fontWeight: "500", color: "var(--meta)", fontSize: "var(--text-xs)", marginLeft: "6px" }}>系統自動計算</span></label>
+                    <span style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: "600" }}>帶餐費<span style={{ fontWeight: "500", color: "var(--meta)", fontSize: "var(--text-xs)", marginLeft: "6px" }}>系統自動計算</span></span>
                     <div className="fee-calc" id="feeCalc" style={{ marginTop: "8px" }}>
                       <div className="fee-calc__rows" id="feeRows"></div>
                       <div className="fee-calc__total"><span>帶餐費</span><span className="fee" id="feeTotal">$15</span></div>

@@ -21,7 +21,7 @@ export function ensureCampusRuntime() {
     'window.__campusEatsInit = function () {',
   )
   const runnableSource = sourceWithInit.replace(
-    /\n  \}\);\s*\n\}\)\(\);\s*$/,
+    /\n {2}\}\);\s*\n\}\)\(\);\s*$/,
     '\n  };\n})();',
   )
 

@@ -533,8 +533,14 @@
     autoMountSearch();
     window.CampusEats.mountTopnav();
     window.CampusEats.bindRoleLinks();
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") { var open = document.querySelector(".sheet.is-open"); if (open) window.closeSheet(open.id); }
-    });
+    // Bind the global Escape-to-close-sheet handler only once. In the SPA wrapper
+    // this bootstrap runs on every route mount, so an unguarded listener would
+    // accumulate one duplicate document-level handler per navigation.
+    if (!window.__campusEatsEscBound) {
+      window.__campusEatsEscBound = true;
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { var open = document.querySelector(".sheet.is-open"); if (open) window.closeSheet(open.id); }
+      });
+    }
   });
 })();

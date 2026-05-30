@@ -95,6 +95,7 @@ export function PageChrome({ pageId, title, bodyAttrs, scripts = [], children }:
   const navigate = useNavigate()
   const location = useLocation()
   const rootRef = useRef<HTMLDivElement>(null)
+  const scriptsRanForKey = useRef<string | null>(null)
   const renderKey = useMemo(() => `${pageId}:${location.key}:${location.search}`, [location.key, location.search, pageId])
 
   useLegacyLinks(rootRef, renderKey)
@@ -112,7 +113,17 @@ export function PageChrome({ pageId, title, bodyAttrs, scripts = [], children }:
     applyBodyAttributes(bodyAttrs)
     removeLegacyChrome()
     runCampusInit()
-    executeInlineScripts(pageId, scripts)
+
+    // Execute each page's legacy inline scripts exactly once per mounted route
+    // instance (keyed by renderKey, which the root <div> below is also keyed on).
+    // React StrictMode double-invokes effects in development, and a hash-only
+    // navigation re-runs this effect without remounting the route container.
+    // Without this guard, append-style scripts (timeline steps, rating tags,
+    // reputation cells) would duplicate their injected DOM and stack listeners.
+    if (scriptsRanForKey.current !== renderKey) {
+      executeInlineScripts(pageId, scripts)
+      scriptsRanForKey.current = renderKey
+    }
 
     if (location.hash) {
       const target = document.getElementById(decodeURIComponent(location.hash.slice(1)))
@@ -122,7 +133,7 @@ export function PageChrome({ pageId, title, bodyAttrs, scripts = [], children }:
     }
 
     return removeLegacyChrome
-  }, [bodyAttrs, location.hash, location.search, navigate, pageId, scripts, title])
+  }, [bodyAttrs, location.hash, location.key, location.search, navigate, pageId, renderKey, scripts, title])
 
   return (
     <div key={renderKey} ref={rootRef} data-react-route={routePathForPage(pageId)}>

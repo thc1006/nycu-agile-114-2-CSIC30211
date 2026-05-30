@@ -1,0 +1,5 @@
+# Playwright MCP / browser-automation scratch output
+.playwright-mcp/
+
+# OS / editor
+.DS_Store
