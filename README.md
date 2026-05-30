@@ -484,7 +484,7 @@ python -m pytest -q
 Expected result:
 
 ```text
-35 passed
+39 passed
 ```
 
 Warnings may appear, but they do not mean the tests failed. The important part is that all tests pass.
@@ -565,7 +565,7 @@ zsh: permission denied: ./scripts/run-tests.sh
 Expected result:
 
 ```text
-35 passed
+39 passed
 ```
 
 ---
