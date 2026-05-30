@@ -1,3 +1,6 @@
+# Open Design local tooling (not part of the production frontend)
+.od-skills/
+
 # Playwright MCP / browser-automation scratch output
 .playwright-mcp/
 
