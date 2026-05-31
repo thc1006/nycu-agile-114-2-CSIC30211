@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import type { ComponentType } from 'react'
 import { renderWithRouter } from '../test/renderWithRouter'
 
-import IndexPage from './IndexPage'
 import LandingPage from './LandingPage'
 import RegisterPage from './RegisterPage'
 import LoginPage from './LoginPage'
@@ -14,8 +13,7 @@ import LoginPage from './LoginPage'
 // jsdom axe is too slow on the heavy legacy DOM of the interior pages and can't
 // evaluate layout-dependent rules anyway, so that coverage lives at the e2e tier.
 const entryPages: Array<{ name: string; Component: ComponentType; route: string }> = [
-  { name: 'IndexPage', Component: IndexPage, route: '/' },
-  { name: 'LandingPage', Component: LandingPage, route: '/landing' },
+  { name: 'LandingPage', Component: LandingPage, route: '/' },
   { name: 'RegisterPage', Component: RegisterPage, route: '/register' },
   { name: 'LoginPage', Component: LoginPage, route: '/login' },
 ]

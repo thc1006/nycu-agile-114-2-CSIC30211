@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('routing', () => {
-  test('renders the overview/index page at the root', async ({ page }) => {
+  test('renders the landing page at the root', async ({ page }) => {
     await page.goto('/')
     await expect(page).toHaveTitle(/CampusEats/)
-    await expect(page.getByRole('heading', { name: /校園帶餐媒合平台/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /沒空買飯/ })).toBeVisible()
   })
 
   test('resolves a legacy .html deep link through the SPA router', async ({ page }) => {
@@ -13,7 +13,7 @@ test.describe('routing', () => {
     await expect(page.getByRole('heading', { name: '待接訂單' })).toBeVisible()
   })
 
-  test('redirects an unknown path back to the index', async ({ page }) => {
+  test('redirects an unknown path back to the landing root', async ({ page }) => {
     await page.goto('/this-page-does-not-exist')
     await expect(page).toHaveURL(/\/$/)
   })

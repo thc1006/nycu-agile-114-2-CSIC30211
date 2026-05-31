@@ -6,8 +6,8 @@ import {
 } from './legacyRoutes'
 
 describe('pageIdFromPath', () => {
-  it('maps "/" to the index page', () => {
-    expect(pageIdFromPath('/')).toBe('index')
+  it('maps "/" to the landing page', () => {
+    expect(pageIdFromPath('/')).toBe('landing')
   })
 
   it('strips the .html suffix from legacy paths', () => {
@@ -31,8 +31,8 @@ describe('pageIdFromPath', () => {
 })
 
 describe('routePathForPage', () => {
-  it('renders the index page at the root', () => {
-    expect(routePathForPage('index')).toBe('/')
+  it('renders the landing page at the root', () => {
+    expect(routePathForPage('landing')).toBe('/')
   })
 
   it('renders other pages at /<id>', () => {

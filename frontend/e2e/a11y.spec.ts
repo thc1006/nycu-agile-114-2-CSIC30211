@@ -8,8 +8,7 @@ import { test, expect } from '@playwright/test'
 const AXE_PATH = 'node_modules/axe-core/axe.js'
 
 const pages: Array<{ name: string; url: string }> = [
-  { name: 'index', url: '/' },
-  { name: 'landing', url: '/landing' },
+  { name: 'landing', url: '/' },
   { name: 'register', url: '/register' },
   { name: 'login', url: '/login?role=orderer' },
   { name: 'dashboard', url: '/dashboard?role=orderer' },

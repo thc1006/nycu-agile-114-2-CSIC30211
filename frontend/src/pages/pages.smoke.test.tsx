@@ -5,7 +5,6 @@ import { renderWithRouter } from '../test/renderWithRouter'
 import DashboardPage from './DashboardPage'
 import FeedPage from './FeedPage'
 import HistoryDetailPage from './HistoryDetailPage'
-import IndexPage from './IndexPage'
 import LandingPage from './LandingPage'
 import LoginPage from './LoginPage'
 import MyOrdersPage from './MyOrdersPage'
@@ -22,8 +21,7 @@ import RunnerReviewsPage from './RunnerReviewsPage'
 // Each page is mounted under a route that satisfies its role guard and (where
 // relevant) supplies a valid order id, so its legacy inline scripts run for real.
 const pages: Array<{ name: string; Component: ComponentType; route: string }> = [
-  { name: 'IndexPage', Component: IndexPage, route: '/' },
-  { name: 'LandingPage', Component: LandingPage, route: '/landing' },
+  { name: 'LandingPage', Component: LandingPage, route: '/' },
   { name: 'RegisterPage', Component: RegisterPage, route: '/register' },
   { name: 'LoginPage', Component: LoginPage, route: '/login' },
   { name: 'DashboardPage', Component: DashboardPage, route: '/dashboard?role=orderer' },

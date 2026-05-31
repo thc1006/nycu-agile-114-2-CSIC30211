@@ -16,10 +16,10 @@ const pageRoleGuard: Partial<Record<PageId, Role>> = {
   'runner-reviews': 'runner',
 }
 
-// Marketing/entry pages already render their own <footer class="foot">. Adding
-// the shared app footer there would create a second contentinfo landmark, so
-// they opt out and the rest of the app gets the shared footer.
-const pagesWithOwnFooter = new Set<PageId>(['index', 'landing'])
+// The landing page already renders its own <footer class="foot">. Adding the
+// shared app footer there would create a second contentinfo landmark, so it
+// opts out and the rest of the app gets the shared footer.
+const pagesWithOwnFooter = new Set<PageId>(['landing'])
 
 function normalizeRole(value: string | null): Role {
   return value === 'runner' ? 'runner' : 'orderer'
