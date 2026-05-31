@@ -1,0 +1,7 @@
+# Dev / CI tooling proposed in the PR #9 review.
+# Install with: pip install -r requirements.txt -r requirements-dev.txt
+pytest-cov            # coverage measurement + --cov-fail-under gate
+ruff                  # linting + formatting
+mypy                  # static type checking (advisory at first)
+bandit                # SAST for Python
+pip-audit             # dependency vulnerability scanning
