@@ -39,9 +39,6 @@ def _completed(client, auth_headers, create_order):
     return order_id, buyer, runner
 
 
-# --- transition role guards (PR only tested the 'start' role) ---
-
-
 def test_only_runner_can_deliver(client, auth_headers, create_order):
     # State is valid for `deliver` (BUYING), so this exercises the ROLE guard (403),
     # not the state guard (409).
@@ -62,18 +59,12 @@ def test_non_participant_cannot_confirm(client, auth_headers, create_order):
     assert resp.status_code == 403
 
 
-# --- rating: missing order 404 (uncovered branch) ---
-
-
 def test_rate_nonexistent_order_returns_404(client, auth_headers):
     headers = auth_headers(email="solo@test.com", password="123456", name="獨行")
     resp = client.post(
         "/orders/o_does_not_exist/ratings", headers=headers, json={"stars": 5}
     )
     assert resp.status_code == 404
-
-
-# --- rating contract + input validation ---
 
 
 def test_rating_response_contract(client, auth_headers, create_order):
@@ -111,9 +102,6 @@ def test_rating_rejects_non_integer_or_missing_stars(client, auth_headers, creat
     for bad in ({"stars": "abc"}, {"stars": None}, {"stars": [5]}, {"stars": 3.5}, {}):
         resp = client.post(f"/orders/{order_id}/ratings", headers=buyer, json=bad)
         assert resp.status_code == 422, f"expected 422 for {bad}, got {resp.status_code}"
-
-
-# --- concurrency: real lock contention + lock release ---
 
 
 def test_accept_blocked_when_order_lock_already_held(
@@ -160,9 +148,6 @@ def test_lock_key_released_after_transition(
 
     # The per-order mutation lock must be compare-and-deleted, never left dangling.
     assert redis_client.exists(f"lock:order:{order_id}") == 0
-
-
-# --- rating aggregate visibility (pins current behaviour; see security note) ---
 
 
 def test_any_authenticated_user_can_read_rating_aggregate(
