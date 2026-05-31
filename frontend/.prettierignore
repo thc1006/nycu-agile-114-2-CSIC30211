@@ -1,0 +1,13 @@
+# Vendored legacy prototype runtime. `src/lib/legacyRuntime.ts` rewrites this
+# file's bootstrap by matching exact source text (INIT_HOOK / TAIL_PATTERN,
+# including the 2-space indentation of the IIFE tail). Reformatting it — e.g. an
+# editor's format-on-save — would break those regexes and disable interactivity
+# app-wide (the asserts throw loudly, caught + logged by PageChrome). Keep it as
+# the faithful vendored copy; never auto-format it.
+src/legacy/
+
+# Generated / build output.
+dist/
+coverage/
+playwright-report/
+test-results/

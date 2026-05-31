@@ -1,0 +1,96 @@
+name: Frontend CI
+
+# Runs the frontend quality gate (Vite + React + TypeScript).
+# Path-filtered so it only fires for frontend changes and never collides with
+# the backend CI workflow. Resolves issue #2 (CI lint) for the React app, plus
+# type-check / build / unit+component tests / E2E.
+on:
+  push:
+    branches: [main, 'feature/**']
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+
+concurrency:
+  group: frontend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  # Cheap → expensive: lint and types fail before build/tests ever run.
+  build-and-test:
+    name: Lint · Typecheck · Build · Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Type-check (tsc)
+        run: npm run typecheck
+
+      - name: Production build (Vite)
+        run: npm run build
+
+      - name: Unit + component tests (Vitest, with coverage)
+        run: npm run test:cov
+
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: frontend/coverage
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # End-to-end browser flows. Gated behind the unit gate so we don't spend
+  # browser minutes when the cheap checks are already red.
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
