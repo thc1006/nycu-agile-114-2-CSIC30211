@@ -1,0 +1,13 @@
+# Proposed in the PR #9 review: automated dependency-update + vuln alerts
+# (addresses the "deps unpinned / no supply-chain scanning" gap, issue #5).
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
