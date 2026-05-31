@@ -120,6 +120,35 @@ describe('accessibility interactions', () => {
   })
 })
 
+// ── SPA navigation chrome ──────────────────────────────────────────────────────
+describe('SPA navigation chrome', () => {
+  afterEach(() => {
+    document.querySelectorAll('[data-topnav-bottom]').forEach((n) => n.remove())
+  })
+
+  it('intercepts the body-mounted phone bottom-nav so mobile taps stay client-side', () => {
+    renderWithRouter(<DashboardPage />, { route: '/dashboard?role=orderer' })
+
+    // The legacy runtime mirrors the role nav as a phone bottom-bar appended to
+    // <body> (a SIBLING of .app-shell), shown below the desktop breakpoint where
+    // it is the only primary navigation. A root-scoped click listener never sees
+    // it, so its taps used to trigger a full document reload instead of an SPA
+    // transition. The interceptor is delegated on `document` to fix that.
+    const bottomNav = document.querySelector('[data-topnav-bottom]')
+    expect(bottomNav).not.toBeNull()
+    expect(bottomNav?.parentElement).toBe(document.body)
+
+    const link = bottomNav?.querySelector('a[href*="post-order"]') as HTMLAnchorElement
+    expect(link).not.toBeNull()
+
+    // A plain primary click must be intercepted (preventDefault) and handed to
+    // react-router — NOT left to fall through to a full document navigation.
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 })
+    link.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(true)
+  })
+})
+
 // ── Bug-fix regressions ────────────────────────────────────────────────────────
 describe('regressions', () => {
   it('caps a menu line quantity at 8 (matches the fee rate card ceiling)', () => {

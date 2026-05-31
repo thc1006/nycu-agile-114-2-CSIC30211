@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from 'react'
+import { useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { clientPathFromLegacyHref, routePathForPage, type PageId } from '../lib/legacyRoutes'
 import { runCampusInit } from '../lib/legacyRuntime'
@@ -6,6 +6,13 @@ import { runCampusInit } from '../lib/legacyRuntime'
 const ROLE_KEY = 'campuseats.role'
 type Role = 'orderer' | 'runner'
 
+// Pages that belong exclusively to one role. NOTE: this is intentionally
+// STRICTER than the legacy prototype, which only called CampusEats.guard() on
+// `dashboard` (orderer) and `feed` (runner). The other five entries are added
+// hardening so a deep link / refresh with the wrong `?role=` is bounced home,
+// not just hidden by role-specific nav. Shared pages (my-orders, order-tracking,
+// rating, history-detail, profile) self-segregate by role/owner and stay off
+// this map by design.
 const pageRoleGuard: Partial<Record<PageId, Role>> = {
   dashboard: 'orderer',
   'post-order': 'orderer',
@@ -76,13 +83,10 @@ function executeInlineScripts(pageId: PageId, scripts: readonly string[]) {
   })
 }
 
-function useLegacyLinks(rootRef: RefObject<HTMLElement | null>, resetKey: string) {
+function useLegacyLinks() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const root = rootRef.current
-    if (!root) return
-
     function onClick(event: MouseEvent) {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
         return
@@ -98,9 +102,17 @@ function useLegacyLinks(rootRef: RefObject<HTMLElement | null>, resetKey: string
       navigate(clientPath)
     }
 
-    root.addEventListener('click', onClick)
-    return () => root.removeEventListener('click', onClick)
-  }, [navigate, resetKey, rootRef])
+    // Delegate on `document`, not the page root. The legacy runtime mounts the
+    // phone bottom-nav (`[data-topnav-bottom]`) on <body> — a SIBLING of the
+    // `.app-shell` root — so a root-scoped listener never sees those taps, and
+    // below the desktop breakpoint (where the bottom bar is the only primary
+    // nav) every navigation full-reloads the document instead of routing
+    // client-side. Document-level delegation catches them; clientPathFromLegacyHref
+    // ignores hash, cross-origin, and non-route links, so in-page anchors and the
+    // skip link keep their native behaviour.
+    document.addEventListener('click', onClick)
+    return () => document.removeEventListener('click', onClick)
+  }, [navigate])
 }
 
 interface PageChromeProps {
@@ -114,11 +126,10 @@ interface PageChromeProps {
 export function PageChrome({ pageId, title, bodyAttrs, scripts = [], children }: PageChromeProps) {
   const navigate = useNavigate()
   const location = useLocation()
-  const rootRef = useRef<HTMLDivElement>(null)
   const scriptsRanForKey = useRef<string | null>(null)
   const renderKey = useMemo(() => `${pageId}:${location.key}:${location.search}`, [location.key, location.search, pageId])
 
-  useLegacyLinks(rootRef, renderKey)
+  useLegacyLinks()
 
   useEffect(() => {
     // Install the SPA navigation hook before any legacy code runs so imperative
@@ -185,7 +196,7 @@ export function PageChrome({ pageId, title, bodyAttrs, scripts = [], children }:
   }, [bodyAttrs, location.hash, location.key, location.search, navigate, pageId, renderKey, scripts, title])
 
   return (
-    <div key={renderKey} ref={rootRef} className="app-shell" data-react-route={routePathForPage(pageId)}>
+    <div key={renderKey} className="app-shell" data-react-route={routePathForPage(pageId)}>
       <a className="skip-link" href="#main">跳到主要內容</a>
       {children}
       {!pagesWithOwnFooter.has(pageId) && (
