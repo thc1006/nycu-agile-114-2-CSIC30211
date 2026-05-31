@@ -91,12 +91,37 @@ npm run typecheck   # tsc project type-check
 npm run build       # production build (tsc -b && vite build)
 npm test            # Vitest unit + component tests
 npm run test:cov    # the above, with a coverage report
-npm run test:e2e    # Playwright end-to-end flows (builds + previews the app)
+npm run test:e2e    # Playwright E2E — desktop + mobile projects (builds + previews)
 ```
 
 `npm run test:watch` runs Vitest in watch mode during development. The first
 `npm run test:e2e` needs browsers installed once with
 `npx playwright install --with-deps chromium`.
+
+### Playwright projects
+
+`test:e2e` runs two functional projects so the mobile form factor (the app's
+primary one) is covered, not just desktop:
+
+- **desktop** (Desktop Chrome) — journeys + the full axe accessibility sweep.
+- **mobile** (Pixel 5) — the same journeys plus the phone bottom-nav regression.
+
+There is also a **visual-regression** lane, run separately because screenshot
+baselines are platform-specific:
+
+```bash
+npm run test:e2e:visual         # compare key pages (desktop + mobile) to baselines
+npm run test:e2e:visual:update  # regenerate baselines after an intentional change
+npm run test:e2e:all            # every project including visual
+```
+
+Visual baselines live in `e2e/visual.spec.ts-snapshots/` and are committed with
+a `-darwin`/`-linux` platform suffix. They are intentionally **not** part of the
+CI gate (`test:e2e`): CI runs on Linux and would diff against macOS-generated
+baselines. Run the visual lane locally, or regenerate per-platform, when CSS
+changes. Regression tests for every fixed bug live alongside the feature tests
+(e.g. the mobile bottom-nav full-reload fix is pinned in both
+`src/pages/hardening.test.tsx` and `e2e/mobile-nav.spec.ts`).
 
 ## Continuous integration
 
