@@ -65,6 +65,29 @@ class OrderService:
         return order
 
     @staticmethod
+    async def get_order_authorized(order_id: str, requester_id: str) -> dict:
+        """Read a single order with object-level authorization (fixes IDOR).
+
+        OPEN orders are public — they are listed in the runner feed so any
+        authenticated user can inspect one before accepting. Once an order is
+        accepted/in-progress/completed, only its two participants (the customer
+        and the assigned runner) may read its details (pickup location, etc.).
+        Order existence is checked first so the 404 path is unchanged.
+        """
+        order = await OrderService.get_order(order_id)
+
+        if order["status"] == "OPEN":
+            return order
+
+        if requester_id in (order["customer_id"], order.get("runner_id")):
+            return order
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not a participant in this order",
+        )
+
+    @staticmethod
     async def list_open_orders() -> list[dict]:
         orders = await OrderRepository.list_open_orders()
 

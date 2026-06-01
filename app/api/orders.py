@@ -56,7 +56,9 @@ async def get_order(
     order_id: str,
     current_user: dict = Depends(get_current_user),
 ):
-    return await OrderService.get_order(order_id)
+    # Object-level authorization (IDOR fix): only participants may read a
+    # non-OPEN order; OPEN orders stay publicly readable (runner feed).
+    return await OrderService.get_order_authorized(order_id, current_user["id"])
 
 
 @router.post(
