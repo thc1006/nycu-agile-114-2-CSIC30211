@@ -2,6 +2,20 @@
 <html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Baseline Content-Security-Policy. This locks down the high-value vectors that
+      cost nothing today: object/embed (plugin injection), <base> hijacking, and the
+      default fetch origin. script-src still needs 'unsafe-eval' (the legacy runtime
+      runs via Function()) and 'unsafe-inline' (the a11y E2E injects axe via
+      addScriptTag) — tightening it to a nonce/hash + 'strict-dynamic' policy WITHOUT
+      'unsafe-eval' is tracked in #13 (de-eval the legacy runtime). frame-ancestors,
+      X-Frame-Options and a report endpoint must be set at the hosting/header layer
+      (they are ignored when delivered via <meta>).
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content="CampusEats — 校園帶餐媒合平台，學生幫學生。" />

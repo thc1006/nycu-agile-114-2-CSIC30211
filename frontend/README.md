@@ -1,5 +1,18 @@
 # CampusEats Development
 
+> **Status: feature-complete UI shell — mock-stage, integration-pending (NOT production-ready yet).**
+> The frontend runs entirely on hardcoded mock data; there is no real API, auth, or
+> persistence. "Production-grade engineering" (CI gate, a11y, coverage, ErrorBoundary)
+> is in place, but the following are required before any "production-ready" claim:
+> - **#12** — wire the real backend (typed API client, JWT auth, CORS), add loading/
+>   error/empty states, and rewrite the mock-stage E2E (see `e2e/*` MOCK-STAGE notes).
+> - **#13** — remove the `Function()`/`unsafe-eval` runtime so a strict CSP can ship
+>   without `'unsafe-eval'` (a baseline CSP is already set in `index.html`).
+> - **#14** — fix the false-green journey E2E so it fails when the create→track link breaks.
+>
+> Coverage (~90%) measures the React/adapter shell only — `src/legacy/campus-web.js`
+> (the bulk of the logic) is excluded from the metric.
+
 ## Prerequisites
 
 - Docker with Docker Compose
@@ -73,11 +86,15 @@ Two host requirements matter for the backend/integration teams:
    `/index.html`. Without this, refreshing a deep link 404s. In-app navigation
    already stays client-side (no full reloads) via the `CampusEats.go` →
    `window.__campusNavigate` hook installed by `PageChrome`.
-2. **Content-Security-Policy.** The shared legacy runtime and each page's inline
-   scripts execute via `Function()` (a deliberate wrapper around the original
-   `campus-web.js`), so a strict CSP must allow `script-src 'unsafe-eval'`, or
-   the app will not boot. If a stricter CSP is required, the legacy runtime must
-   first be ported to an ES module (tracked as future work).
+2. **Content-Security-Policy.** A baseline CSP now ships in `index.html` (locks
+   `object-src`/`base-uri`/`default-src`, restricts img/font/connect to `'self'`).
+   `script-src` still carries `'unsafe-eval'` because the shared legacy runtime and
+   each page's inline scripts execute via `Function()` (a deliberate wrapper around
+   the original `campus-web.js`) — without it the app will not boot. Set
+   `frame-ancestors`/`X-Frame-Options` and a report endpoint at the hosting/header
+   layer (these are ignored via `<meta>`). Tightening `script-src` to a nonce/hash +
+   `'strict-dynamic'` policy **without** `'unsafe-eval'` requires porting the legacy
+   runtime to an ES module — tracked in **#13**.
 
 ## Quality checks (lint, types, tests)
 

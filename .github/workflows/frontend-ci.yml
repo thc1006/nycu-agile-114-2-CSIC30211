@@ -41,6 +41,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Dependency audit (SCA)
+        run: npm audit --audit-level=high
+
       - name: Lint (ESLint)
         run: npm run lint
 

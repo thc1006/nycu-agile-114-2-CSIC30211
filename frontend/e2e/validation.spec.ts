@@ -47,6 +47,14 @@ test.describe('post-order validation', () => {
   })
 })
 
+// MOCK-STAGE (#12): "login" is a client-side nav — LoginPage.tsx validates only
+// non-empty + email regex, sets a role in localStorage, and follows an <a href>.
+// There is NO credential check and NO token. The "accepts ..." test below is
+// therefore FALSE-GREEN: it asserts the regex passed and the link fired, not that
+// the server authenticated anyone — it will keep passing after a real backend is
+// wired in and rejects these exact credentials. When #12 lands, replace it with an
+// assertion on an authenticated signal (token/cookie/authed-only element or a 200
+// from the auth call) PLUS a negative test that wrong creds are rejected.
 test.describe('login validation', () => {
   test('rejects a malformed email even with a password present', async ({ page }) => {
     await page.goto('/login?role=orderer')
@@ -71,7 +79,8 @@ test.describe('login validation', () => {
     await expect(page.locator('.field:has(#email)')).toHaveClass(/has-error/)
   })
 
-  test('accepts a well-formed email + password and proceeds to the dashboard', async ({ page }) => {
+  // FALSE-GREEN until #12 — proves only client-side regex + navigation, not auth.
+  test('accepts a well-formed email (client-side only — no real auth, see #12) and proceeds to the dashboard', async ({ page }) => {
     await page.goto('/login?role=orderer')
     await page.locator('#email').fill('student@campus.edu')
     await page.locator('#pw').fill('demo-password')
