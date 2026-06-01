@@ -1,0 +1,28 @@
+# Tooling config proposed in the PR #9 review (quality gates).
+# Kept tool-only so `pytest -q` still works without pytest-cov installed;
+# CI passes the --cov flags explicitly.
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# Lint uses ruff's DEFAULT rule set (pyflakes F + the E4/E7/E9 pycodestyle
+# subset), which is already clean on this codebase, so `ruff check` is a green
+# hard gate. To widen later: run `ruff check --fix --select I,B,UP` to baseline
+# the existing code, then add `[tool.ruff.lint] select = ["E","F","I","B","UP"]`.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+# Start lenient; tighten over time.
+disallow_untyped_defs = false

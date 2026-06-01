@@ -1,8 +1,29 @@
+# ── Frontend / tooling ─────────────────────────────────────────────
 # Open Design local tooling (not part of the production frontend)
 .od-skills/
-
 # Playwright MCP / browser-automation scratch output
 .playwright-mcp/
 
-# OS / editor
+# ── Python / backend ───────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ── Logs / generated ───────────────────────────────────────────────
+*.log
+*.zip
+*.tar
+*.tar.gz
+*.sqlite3
+*.db
+
+# ── IDE / OS ───────────────────────────────────────────────────────
+.vscode/
+.idea/
 .DS_Store
