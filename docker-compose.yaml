@@ -1,4 +1,14 @@
+# Single source of truth for local dev: backend datastore (redis) + frontend.
+# The FastAPI backend runs via uvicorn against redis:6379 (see docs/backend.md).
+# `docker compose up -d redis` for backend dev; `... up -d frontend` for the UI.
 services:
+  redis:
+    image: redis:7
+    container_name: campuseats-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
   frontend:
     image: node:22-alpine
     working_dir: /app
