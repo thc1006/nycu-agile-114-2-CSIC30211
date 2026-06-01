@@ -4,6 +4,11 @@
 # Playwright MCP / browser-automation scratch output
 .playwright-mcp/
 
+# ── Secrets / local env (never commit real secrets) ───────────────
+.env
+app/.env
+*.env.local
+
 # ── Python / backend ───────────────────────────────────────────────
 .venv/
 __pycache__/
