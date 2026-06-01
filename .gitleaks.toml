@@ -1,0 +1,26 @@
+# gitleaks config for CampusEats. Extends the default ruleset and allowlists
+# KNOWN-SAFE values only: pytest fixtures and documentation placeholders. Real
+# credentials are still caught. Keep this list tight — never allowlist a value
+# you haven't confirmed is a non-secret.
+title = "CampusEats gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Test fixtures and documentation placeholders (verified non-secrets)"
+# Placeholder variable names in README curl examples (e.g. -H "Authorization: Bearer $RUNNER_TOKEN")
+# and deliberate dummy secrets used by pytest / CI. These are not real credentials.
+regexes = [
+  '''\$?(RUNNER|BUYER|ANY)_TOKEN''',
+  '''a-sufficiently-long-and-unique-jwt-secret[0-9-]*''',
+  '''ci-only-secret-key-at-least-32-bytes-long[a-z-]*''',
+  '''test-secret-key-for-ci[0-9a-f-]*''',
+  '''change-this-in-production''',
+  '''dev-secret-key''',
+]
+# Test code intentionally embeds dummy secrets to exercise validation paths.
+paths = [
+  '''tests/test_jwt_config\.py''',
+  '''.*\.env\.example''',
+]
