@@ -2,7 +2,8 @@ import os
 
 # Must be set before importing app.main
 os.environ["REDIS_DB"] = "15"
-os.environ["JWT_SECRET_KEY"] = "test-secret-key"
+# A >=32-byte, non-placeholder secret so config validation passes under test.
+os.environ["JWT_SECRET_KEY"] = "test-secret-key-for-ci-0123456789abcdef"
 
 import pytest
 import redis
