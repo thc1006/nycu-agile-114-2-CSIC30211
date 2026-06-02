@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: campuseats
+data:
+  APP_NAME: "CampusEats API"
+  APP_ENV: "production"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  JWT_ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "1440"
+  # Origins allowed to call the API. Update to the real frontend host served by
+  # the Ingress (must match how users reach the site, scheme included).
+  CORS_ORIGINS: "https://campuseat.hsuan.app"
