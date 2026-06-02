@@ -1,16 +1,18 @@
+# Two separate Ingress objects so the /api rewrite never touches the frontend.
+# (A rewrite-target annotation applies to the WHOLE Ingress — if frontend and
+# api share one Ingress, every frontend URL also gets rewritten to "/", which
+# is why every page used to render the homepage.)
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: campuseats
+  name: campuseats-api
   labels:
     app.kubernetes.io/part-of: campuseats
   annotations:
-    # Strip the /api prefix before forwarding: backend routes live at the root
-    # (/auth, /orders, /health, ...), so /api/health -> /health upstream.
+    # Strip the /api prefix: backend routes live at the root (/auth, /orders,
+    # /health, ...), so /api/health -> /health upstream.
     nginx.ingress.kubernetes.io/rewrite-target: /$2
-    # Auto-provision a Let's Encrypt cert for the host below via the
-    # Cloudflare DNS-01 ClusterIssuer; drop this annotation (and the tls block)
-    # if you terminate TLS elsewhere.
     cert-manager.io/cluster-issuer: letsencrypt-cloudflare
 spec:
   ingressClassName: nginx
@@ -29,6 +31,25 @@ spec:
                 name: backend
                 port:
                   number: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: campuseats-frontend
+  labels:
+    app.kubernetes.io/part-of: campuseats
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - campuseat.hsuan.app
+      secretName: campuseat-tls
+  rules:
+    - host: campuseat.hsuan.app
+      http:
+        paths:
           - path: /
             pathType: Prefix
             backend:
