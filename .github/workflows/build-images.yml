@@ -96,13 +96,26 @@ jobs:
 
       # Only update the manifests on default-branch builds (not on vX.Y tags,
       # which often point at an already-released commit).
+      - name: Install kustomize
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          ver=v5.4.3
+          asset=kustomize_${ver}_linux_amd64.tar.gz
+          # Authenticated download avoids the anonymous GitHub rate limit.
+          curl -sSL -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${ver}/${asset}" \
+            -o "${asset}"
+          tar -xzf "${asset}"
+          sudo install -m 0755 kustomize /usr/local/bin/kustomize
+          kustomize version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Bump kustomize image tags
         if: github.ref == 'refs/heads/main'
         run: |
           set -euo pipefail
-          curl -sSLo /usr/local/bin/kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64 || \
-            { curl -sSL https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash && mv kustomize /usr/local/bin/; }
-          chmod +x /usr/local/bin/kustomize || true
           cd k8s
           kustomize edit set image "${BACKEND_IMAGE}=${BACKEND_IMAGE}:${SHA_TAG}"
           kustomize edit set image "${FRONTEND_IMAGE}=${FRONTEND_IMAGE}:${SHA_TAG}"
