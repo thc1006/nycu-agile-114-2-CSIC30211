@@ -98,19 +98,13 @@ jobs:
       # which often point at an already-released commit).
       - name: Install kustomize
         if: github.ref == 'refs/heads/main'
-        run: |
-          set -euo pipefail
-          ver=v5.4.3
-          asset=kustomize_${ver}_linux_amd64.tar.gz
-          # Authenticated download avoids the anonymous GitHub rate limit.
-          curl -sSL -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-            "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${ver}/${asset}" \
-            -o "${asset}"
-          tar -xzf "${asset}"
-          sudo install -m 0755 kustomize /usr/local/bin/kustomize
-          kustomize version
+        # The install script reads GITHUB_TOKEN to make authenticated API calls,
+        # avoiding the anonymous GitHub rate limit.
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
 
       - name: Bump kustomize image tags
         if: github.ref == 'refs/heads/main'
