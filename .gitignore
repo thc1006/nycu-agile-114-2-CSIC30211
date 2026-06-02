@@ -8,6 +8,8 @@
 .env
 app/.env
 *.env.local
+# Real k8s secret (only the .example template is committed).
+k8s/backend/secret.yaml
 
 # ── Python / backend ───────────────────────────────────────────────
 .venv/
