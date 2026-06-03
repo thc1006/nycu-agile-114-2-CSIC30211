@@ -21,6 +21,7 @@ export default function RegisterForm() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
+    if (submitting) return // re-entrancy guard: Enter fires submit even while the button is disabled
     setError('')
     if (!canSubmit) {
       setError('請填寫姓名、有效的學校 Email,密碼至少 6 碼')

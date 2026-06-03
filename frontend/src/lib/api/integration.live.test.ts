@@ -26,6 +26,9 @@ const buyer = { email: `it-buyer-${ts}@example.com`, password: 'demo123', name: 
 const runner = { email: `it-runner-${ts}@example.com`, password: 'demo123', name: '阿翔' }
 const stranger = { email: `it-stranger-${ts}@example.com`, password: 'demo123', name: '路人' }
 
+// NOTE: this suite is intentionally ORDER-DEPENDENT — each `it` builds on the
+// previous via the module-level buyerId/runnerId/orderId. Keep it sequential;
+// do NOT add test.concurrent or randomized ordering, or shared state will clash.
 describe.skipIf(!RUN)('LIVE integration — full transaction loop against the real backend', () => {
   let buyerId = ''
   let runnerId = ''

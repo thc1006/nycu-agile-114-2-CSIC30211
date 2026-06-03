@@ -28,6 +28,7 @@ export default function LoginForm() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
+    if (submitting) return // re-entrancy guard: Enter fires submit even while the button is disabled
     setError('')
     if (!canSubmit) {
       setError('請輸入有效的學校 Email 與密碼')
