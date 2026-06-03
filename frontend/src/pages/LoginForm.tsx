@@ -43,7 +43,9 @@ export default function LoginForm() {
       }
       navigate(homePath(role))
     } catch (err) {
-      setError(err instanceof ApiError ? err.detail : '登入失敗,請稍後再試')
+      // status 0 = transport failure (network/CORS) with an internal sentinel
+      // detail; show the localized fallback, surface only real backend messages.
+      setError(err instanceof ApiError && err.status !== 0 ? err.detail : '登入失敗,請稍後再試')
     } finally {
       setSubmitting(false)
     }

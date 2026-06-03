@@ -1,6 +1,6 @@
 // TDD (RED first): the real wired registration form. Drives RegisterForm's
 // contract — submit name/email/password -> api register() -> on success route
-// to the login page; surface 409/422 errors without navigating. api client mocked.
+// to the login page; surface a 409 duplicate-email error without navigating. api client mocked.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -67,5 +67,6 @@ describe('RegisterForm — wired to the real API', () => {
     renderForm()
     await userEvent.click(screen.getByRole('button', { name: /註冊|建立帳號/ }))
     expect(registerFn).not.toHaveBeenCalled()
+    expect(await screen.findByText(/請填寫姓名/)).toBeInTheDocument()
   })
 })

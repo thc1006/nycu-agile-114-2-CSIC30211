@@ -78,5 +78,6 @@ describe('LoginForm — wired to the real API', () => {
     renderForm('orderer')
     await userEvent.click(screen.getByRole('button', { name: /登入/ }))
     expect(loginFn).not.toHaveBeenCalled()
+    expect(await screen.findByText(/請輸入有效的學校 Email/)).toBeInTheDocument()
   })
 })
