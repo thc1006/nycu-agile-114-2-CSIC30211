@@ -9,7 +9,11 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { ApiError } from '../lib/api/client'
 
-const { navigate, loginFn } = vi.hoisted(() => ({ navigate: vi.fn(), loginFn: vi.fn() }))
+const { navigate, loginFn, registerFn } = vi.hoisted(() => ({
+  navigate: vi.fn(),
+  loginFn: vi.fn(),
+  registerFn: vi.fn(),
+}))
 
 vi.mock('react-router', async (orig) => {
   const actual = await orig<typeof import('react-router')>()
@@ -17,7 +21,7 @@ vi.mock('react-router', async (orig) => {
 })
 vi.mock('../lib/api/auth', () => ({
   login: loginFn,
-  register: vi.fn(),
+  register: registerFn,
   me: vi.fn(),
   logout: vi.fn(),
 }))
@@ -36,6 +40,7 @@ function renderForm(role?: 'orderer' | 'runner') {
 beforeEach(() => {
   navigate.mockClear()
   loginFn.mockReset()
+  registerFn.mockReset()
   localStorage.clear()
 })
 
@@ -79,5 +84,28 @@ describe('LoginForm — wired to the real API', () => {
     await userEvent.click(screen.getByRole('button', { name: /登入/ }))
     expect(loginFn).not.toHaveBeenCalled()
     expect(await screen.findByText(/請輸入有效的學校 Email/)).toBeInTheDocument()
+  })
+
+  // Demo quick-login (course-demo convenience): ensure a shared demo account
+  // exists (register, tolerating 409) then log in with the selected role.
+  it('demo quick-login: ensures the demo account then logs in and routes by role', async () => {
+    registerFn.mockResolvedValue({ id: 'u_demo', email: 'demo@campuseats.app', name: 'Demo 同學' })
+    loginFn.mockResolvedValue({ access_token: 't', token_type: 'bearer' })
+    renderForm('runner')
+    await userEvent.click(screen.getByRole('button', { name: /使用測試帳號/ }))
+
+    expect(loginFn).toHaveBeenCalledWith({ email: 'demo@campuseats.app', password: 'demo1234' })
+    expect(localStorage.getItem('campuseats.role')).toBe('runner')
+    expect(navigate).toHaveBeenCalledWith('/feed?role=runner')
+  })
+
+  it('demo quick-login tolerates an already-registered demo account (409)', async () => {
+    registerFn.mockRejectedValue(new ApiError(409, 'Email already registered'))
+    loginFn.mockResolvedValue({ access_token: 't', token_type: 'bearer' })
+    renderForm('orderer')
+    await userEvent.click(screen.getByRole('button', { name: /使用測試帳號/ }))
+
+    expect(loginFn).toHaveBeenCalled() // 409 on register is swallowed; login still proceeds
+    expect(navigate).toHaveBeenCalledWith('/dashboard?role=orderer')
   })
 })

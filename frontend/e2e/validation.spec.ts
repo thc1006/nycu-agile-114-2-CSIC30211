@@ -47,46 +47,65 @@ test.describe('post-order validation', () => {
   })
 })
 
-// MOCK-STAGE (#12): "login" is a client-side nav — LoginPage.tsx validates only
-// non-empty + email regex, sets a role in localStorage, and follows an <a href>.
-// There is NO credential check and NO token. The "accepts ..." test below is
-// therefore FALSE-GREEN: it asserts the regex passed and the link fired, not that
-// the server authenticated anyone — it will keep passing after a real backend is
-// wired in and rejects these exact credentials. When #12 lands, replace it with an
-// assertion on an authenticated signal (token/cookie/authed-only element or a 200
-// from the auth call) PLUS a negative test that wrong creds are rejected.
+// #12 (wiring) LANDED: login now performs a REAL auth call via the typed api
+// client (LoginForm.tsx) — client-side validation gates the submit, then login()
+// hits POST /auth/login and only navigates on success. The auth endpoint is
+// stubbed at the network layer so these stay hermetic. This covers both the
+// client-validation branches AND a real success/failure signal (200 → navigate,
+// 401 → error + no navigate), replacing the previous false-green nav-only test.
 test.describe('login validation', () => {
   test('rejects a malformed email even with a password present', async ({ page }) => {
     await page.goto('/login?role=orderer')
 
-    // Replace the prefilled valid email with a malformed one (no @ / domain).
-    await page.locator('#email').fill('not-an-email')
-    await page.locator('#pw').fill('demo-password')
-    await page.getByRole('button', { name: '繼續' }).click()
+    await page.getByLabel('學校 Email').fill('not-an-email')
+    await page.getByLabel('密碼').fill('demo-password')
+    await page.getByRole('button', { name: '登入', exact: true }).click()
 
-    // Navigation is blocked and the email field is flagged.
+    // Client validation blocks the submit: no navigation, error surfaced.
     await expect(page).toHaveURL(/\/login/)
-    await expect(page.locator('.field:has(#email)')).toHaveClass(/has-error/)
+    await expect(page.getByText('請輸入有效的學校 Email 與密碼')).toBeVisible()
   })
 
   test('rejects an empty email', async ({ page }) => {
     await page.goto('/login?role=orderer')
-    await page.locator('#email').fill('')
-    await page.locator('#pw').fill('demo-password')
-    await page.getByRole('button', { name: '繼續' }).click()
+    await page.getByLabel('密碼').fill('demo-password')
+    await page.getByRole('button', { name: '登入', exact: true }).click()
 
     await expect(page).toHaveURL(/\/login/)
-    await expect(page.locator('.field:has(#email)')).toHaveClass(/has-error/)
+    await expect(page.getByText('請輸入有效的學校 Email 與密碼')).toBeVisible()
   })
 
-  // FALSE-GREEN until #12 — proves only client-side regex + navigation, not auth.
-  test('accepts a well-formed email (client-side only — no real auth, see #12) and proceeds to the dashboard', async ({ page }) => {
+  test('a valid email + password authenticates and proceeds to the dashboard', async ({ page }) => {
+    await page.route((url) => url.pathname.endsWith('/auth/login'), (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ access_token: 'e2e-token', token_type: 'bearer' }),
+      }),
+    )
     await page.goto('/login?role=orderer')
-    await page.locator('#email').fill('student@campus.edu')
-    await page.locator('#pw').fill('demo-password')
-    await page.getByRole('button', { name: '繼續' }).click()
+    await page.getByLabel('學校 Email').fill('student@campus.edu')
+    await page.getByLabel('密碼').fill('demo-password')
+    await page.getByRole('button', { name: '登入', exact: true }).click()
 
     await expect(page).toHaveURL(/\/dashboard/)
     await expect(page).toHaveURL(/role=orderer/)
+  })
+
+  test('rejects wrong credentials with the server error and stays on login', async ({ page }) => {
+    await page.route((url) => url.pathname.endsWith('/auth/login'), (route) =>
+      route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ detail: 'Invalid email or password' }),
+      }),
+    )
+    await page.goto('/login?role=orderer')
+    await page.getByLabel('學校 Email').fill('student@campus.edu')
+    await page.getByLabel('密碼').fill('wrong-password')
+    await page.getByRole('button', { name: '登入', exact: true }).click()
+
+    await expect(page).toHaveURL(/\/login/)
+    await expect(page.getByText('Invalid email or password')).toBeVisible()
   })
 })
