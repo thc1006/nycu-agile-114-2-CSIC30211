@@ -4,7 +4,7 @@
 // (unit/component tier); the live client↔backend path is covered by
 // src/lib/api/integration.live.test.ts.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { ApiError } from '../lib/api/client'
@@ -94,9 +94,12 @@ describe('LoginForm — wired to the real API', () => {
     renderForm('runner')
     await userEvent.click(screen.getByRole('button', { name: /使用測試帳號/ }))
 
+    // demoLogin awaits register→login before navigating (two async hops); wait for it.
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/feed?role=runner'))
+    // pins the "ensure account exists" contract: register IS called before login.
+    expect(registerFn).toHaveBeenCalledWith({ email: 'demo@campuseats.app', password: 'demo1234', name: 'Demo 同學' })
     expect(loginFn).toHaveBeenCalledWith({ email: 'demo@campuseats.app', password: 'demo1234' })
     expect(localStorage.getItem('campuseats.role')).toBe('runner')
-    expect(navigate).toHaveBeenCalledWith('/feed?role=runner')
   })
 
   it('demo quick-login tolerates an already-registered demo account (409)', async () => {
@@ -105,7 +108,8 @@ describe('LoginForm — wired to the real API', () => {
     renderForm('orderer')
     await userEvent.click(screen.getByRole('button', { name: /使用測試帳號/ }))
 
-    expect(loginFn).toHaveBeenCalled() // 409 on register is swallowed; login still proceeds
-    expect(navigate).toHaveBeenCalledWith('/dashboard?role=orderer')
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/dashboard?role=orderer'))
+    expect(registerFn).toHaveBeenCalled() // 409 on register is swallowed...
+    expect(loginFn).toHaveBeenCalled() // ...and login still proceeds
   })
 })
