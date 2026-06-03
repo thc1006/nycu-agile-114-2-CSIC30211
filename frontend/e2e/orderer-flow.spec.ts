@@ -1,23 +1,33 @@
 import { test, expect } from '@playwright/test'
 
 // End-to-end orderer journey: login (orderer) → dashboard → post a re-order →
-// system fee + confirmation. Backend is mocked, so we assert the frontend
-// behaviour (validation, fee calc, success state) the backend will later wire up.
+// system fee + confirmation. Login now performs a REAL auth call via the typed
+// api client (#12 wiring); the auth endpoint is stubbed at the network layer so
+// the suite stays hermetic. Interior pages still render mock data.
 test.describe('orderer journey', () => {
   test('logs in as an orderer and reaches the dashboard', async ({ page }) => {
+    await page.route((url) => url.pathname.endsWith('/auth/login'), (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ access_token: 'e2e-token', token_type: 'bearer' }),
+      }),
+    )
     await page.goto('/login?role=orderer')
+    await page.getByLabel('學校 Email').fill('orderer@campus.edu')
     await page.getByLabel('密碼').fill('demo-password')
-    await page.getByRole('button', { name: '繼續' }).click()
+    await page.getByRole('button', { name: '登入', exact: true }).click()
 
     await expect(page).toHaveURL(/\/dashboard/)
     await expect(page).toHaveURL(/role=orderer/)
   })
 
-  test('blocks continuing past login without a password', async ({ page }) => {
+  test('blocks continuing past login without valid credentials', async ({ page }) => {
     await page.goto('/login?role=orderer')
-    // Password is intentionally empty (no prefilled credentials).
-    await page.getByRole('button', { name: '繼續' }).click()
+    // Nothing filled in — client validation must block the submit (no nav).
+    await page.getByRole('button', { name: '登入', exact: true }).click()
     await expect(page).toHaveURL(/\/login/)
+    await expect(page.getByText('請輸入有效的學校 Email 與密碼')).toBeVisible()
   })
 
   test('posts a re-order and sees the system-calculated fee + success screen', async ({ page }) => {
