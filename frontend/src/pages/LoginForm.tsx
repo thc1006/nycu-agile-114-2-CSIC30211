@@ -1,10 +1,15 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { login } from '../lib/api/auth'
+import { login, register } from '../lib/api/auth'
 import { ApiError } from '../lib/api/client'
 
 const ROLE_KEY = 'campuseats.role'
 type Role = 'orderer' | 'runner'
+
+// Shared demo account for the course demo (backend has no real email verification).
+// The quick-login button below ensures it exists, then logs in — role is chosen
+// per session, so the one account works as either orderer or runner.
+const DEMO_ACCOUNT = { email: 'demo@campuseats.app', password: 'demo1234', name: 'Demo 同學' }
 
 function homePath(role: Role): string {
   return role === 'runner' ? '/feed?role=runner' : '/dashboard?role=orderer'
@@ -52,6 +57,31 @@ export default function LoginForm() {
     }
   }
 
+  async function demoLogin() {
+    if (submitting) return
+    setError('')
+    setSubmitting(true)
+    try {
+      // ensure the shared demo account exists; ignore "already registered"
+      try {
+        await register(DEMO_ACCOUNT)
+      } catch (err) {
+        if (!(err instanceof ApiError && err.status === 409)) throw err
+      }
+      await login({ email: DEMO_ACCOUNT.email, password: DEMO_ACCOUNT.password })
+      try {
+        localStorage.setItem(ROLE_KEY, role)
+      } catch {
+        // storage unavailable — role still applies via the URL
+      }
+      navigate(homePath(role))
+    } catch (err) {
+      setError(err instanceof ApiError && err.status !== 0 ? err.detail : '測試登入失敗,請稍後再試')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <form id="loginForm" onSubmit={onSubmit} noValidate>
       <div className="field">
@@ -94,6 +124,13 @@ export default function LoginForm() {
       <button type="submit" className="btn btn-black btn--block btn--lg" disabled={submitting}>
         {submitting ? '登入中…' : '登入'}
       </button>
+
+      <button type="button" className="btn btn-white btn--block" onClick={demoLogin} disabled={submitting}>
+        {submitting ? '處理中…' : '使用測試帳號(免註冊)'}
+      </button>
+      <p className="role-hint" style={{ marginTop: '8px' }}>
+        課程 demo 用:一鍵以共用測試帳號登入,免自行註冊。
+      </p>
     </form>
   )
 }
