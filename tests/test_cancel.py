@@ -1,8 +1,8 @@
 """AG-008 cancel-order tests.
 
-OPEN -> CANCELLED, creator-only. Ordering mirrors the FSM: the status check
-(409) runs before the role check (403), but a non-creator cancelling an OPEN
-order still gets 403 because OPEN passes the status check first.
+OPEN -> CANCELLED, creator-only. Check order is 404 -> 403 -> 409: ownership is
+verified before status, so a non-creator always gets 403 (never learning whether
+the order moved past OPEN), and only the creator sees the 409 "already accepted".
 """
 
 
@@ -63,6 +63,22 @@ def test_cannot_cancel_accepted_order(client, auth_headers, create_order):
 
     assert resp.status_code == 409
     assert resp.json()["detail"] == "訂單已被接單，無法取消"
+
+
+def test_non_creator_cannot_cancel_accepted_order(client, auth_headers, create_order):
+    # A stranger must get 403 (not 409): ownership is checked before status, so
+    # they never learn the order has been accepted.
+    buyer = auth_headers(email="buyer@test.com", password="123456", name="小美")
+    runner = auth_headers(email="runner@test.com", password="123456", name="阿翔")
+    stranger = auth_headers(email="stranger@test.com", password="123456", name="路人")
+
+    order_id = create_order(headers=buyer).json()["id"]
+    assert client.post(f"/orders/{order_id}/accept", headers=runner).status_code == 200
+
+    resp = client.post(f"/orders/{order_id}/cancel", headers=stranger)
+
+    assert resp.status_code == 403
+    assert resp.json()["detail"] == "Only the order creator can cancel this order"
 
 
 def test_cancel_unknown_order_returns_404(client, auth_headers):

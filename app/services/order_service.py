@@ -166,9 +166,12 @@ class OrderService:
         OPEN (no runner has claimed it). Runs under the same per-order lock as
         accept/transition so a cancel cannot race an in-flight accept.
 
-        Ordering mirrors the FSM (status 409 before role 403): a non-creator
-        cancelling an OPEN order still gets 403, because OPEN passes the status
-        check and the creator check then fires.
+        Check order: 404 (missing) -> 403 (not the creator) -> 409 (not OPEN).
+        Ownership is verified *before* status so a non-creator can never learn
+        whether the order has progressed past OPEN (it would be a small IDOR
+        info-leak — consistent with the object-level authz in
+        ``get_order_authorized``). It also matches AG-008's "非訂單建立者不可取消"
+        scenario, which expects 403 for a stranger irrespective of state.
         """
         lock_value = f"{user_id}:{uuid4().hex}"
 
@@ -192,16 +195,16 @@ class OrderService:
                     detail="Order not found",
                 )
 
-            if order["status"] != "OPEN":
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="訂單已被接單，無法取消",
-                )
-
             if order["customer_id"] != user_id:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Only the order creator can cancel this order",
+                )
+
+            if order["status"] != "OPEN":
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="訂單已被接單，無法取消",
                 )
 
             order["status"] = "CANCELLED"
