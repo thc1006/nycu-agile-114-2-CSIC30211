@@ -7,6 +7,7 @@ import {
   startOrder,
   deliverOrder,
   confirmOrder,
+  cancelOrder,
   type OrderResponse,
 } from '../lib/api/orders'
 import { ApiError } from '../lib/api/client'
@@ -149,7 +150,7 @@ export default function OrderTracking() {
           {error && <p role="alert" className="form-error">{error}</p>}
 
           <div className="track-actions">
-            {renderAction(order.status, role, busy, act)}
+            {renderAction(order.status, role, busy, act, id)}
           </div>
         </>
       )}
@@ -162,6 +163,7 @@ function renderAction(
   role: Role,
   busy: boolean,
   act: (fn: (orderId: string) => Promise<OrderResponse>) => void,
+  id: string,
 ) {
   const btn = (label: string, fn: (orderId: string) => Promise<OrderResponse>) => (
     <button
@@ -174,17 +176,33 @@ function renderAction(
     </button>
   )
 
+  // Both parties can leave a one-time rating once the order is COMPLETED (AG-007).
+  const rateLink = (
+    <a className="btn btn-black btn--block btn--lg" href={`rating.html?id=${encodeURIComponent(id)}&role=${role}`}>
+      前往評價
+    </a>
+  )
+
   if (role === 'runner') {
     if (status === 'OPEN') return btn('接單', acceptOrder)
     if (status === 'ACCEPTED') return btn('開始購買', startOrder)
     if (status === 'BUYING') return btn('標記已送達', deliverOrder)
     if (status === 'DELIVERED') return <p className="ctx">已送達,等待訂餐者確認收餐…</p>
-    if (status === 'COMPLETED') return <p className="ctx">交易完成,可互相評價。</p>
+    if (status === 'COMPLETED') return rateLink
     return null
   }
 
   // orderer
+  if (status === 'OPEN') {
+    // Only an as-yet-unaccepted order can be withdrawn (AG-008).
+    return (
+      <>
+        <p className="ctx">尚未有帶餐者接單,你仍可取消這筆需求。</p>
+        {btn('取消訂單', cancelOrder)}
+      </>
+    )
+  }
   if (status === 'DELIVERED') return btn('確認收餐', confirmOrder)
-  if (status === 'COMPLETED') return <p className="ctx">交易完成,可互相評價。</p>
+  if (status === 'COMPLETED') return rateLink
   return <p className="ctx">帶餐者處理中,狀態會自動更新,不用一直私訊問進度。</p>
 }

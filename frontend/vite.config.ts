@@ -5,6 +5,20 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Dev mirrors production: the browser talks to a same-origin `/api` path
+  // (so the strict `connect-src 'self'` CSP and zero-CORS setup match prod),
+  // and Vite proxies it to the FastAPI backend, stripping the `/api` prefix
+  // exactly like the production ingress does. Point at a different backend with
+  // VITE_DEV_API_TARGET. Run the dev server with VITE_API_BASE=/api to use it.
+  server: {
+    proxy: {
+      '/api': {
+        target: process.env.VITE_DEV_API_TARGET ?? 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
