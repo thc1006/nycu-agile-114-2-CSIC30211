@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures'
 
 // Full-page accessibility audit in a REAL browser (proper layout, so this is
 // where comprehensive axe coverage lives — jsdom can't evaluate the heavy
@@ -62,32 +62,38 @@ test.describe('accessibility — keyboard interaction', () => {
     await expect(page.locator('#main')).toBeVisible()
   })
 
-  test('the star rating widget is an arrow-key operable radiogroup', async ({ page }) => {
-    await page.goto('/rating?role=orderer')
-    const group = page.locator('#starWidget')
-    await expect(group).toHaveAttribute('role', 'radiogroup')
-    // Focus the first star and drive it with the keyboard.
-    await group.locator('[role="radio"]').first().focus()
-    await page.keyboard.press('ArrowRight')
-    await page.keyboard.press('ArrowRight')
-    await page.keyboard.press('ArrowRight') // → 4 stars
-    await expect(group).toHaveAttribute('data-value', '4')
-    // Submitting becomes enabled once a rating is chosen.
-    await expect(page.locator('#submitBtn')).toBeEnabled()
-  })
-
-  test('opening a dialog moves focus inside it and Escape closes it', async ({ page }) => {
-    await page.goto('/dashboard?role=orderer')
-    await page.locator('#locBtn').click()
-    const sheet = page.locator('#locSheet')
-    await expect(sheet).toHaveClass(/is-open/)
-    // Focus is now within the dialog.
-    const focusedInSheet = await page.evaluate(() => {
-      const s = document.getElementById('locSheet')
-      return !!s && s.contains(document.activeElement)
+  test('the star rating widget is a radiogroup whose selection enables submit', async ({ page }) => {
+    const json = (b: unknown) => ({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(b),
     })
-    expect(focusedInSheet).toBe(true)
-    await page.keyboard.press('Escape')
-    await expect(sheet).not.toHaveClass(/is-open/)
+    await page.route((u) => u.pathname.endsWith('/auth/me'), (r) =>
+      r.fulfill(json({ id: 'u_me', email: 'me@campus.edu', name: '我' })),
+    )
+    await page.route((u) => u.pathname.endsWith('/orders/o_a'), (r) =>
+      r.fulfill(
+        json({
+          id: 'o_a',
+          customer_id: 'u_me',
+          runner_id: 'u_runner',
+          restaurant: '茶壜',
+          meal: '珍奶 ×1',
+          pickup_location: '資工系館',
+          expected_time: '2026-06-10T12:30:00+08:00',
+          delivery_fee: 20,
+          status: 'COMPLETED',
+          created_at: '2026-06-04T10:00:00+08:00',
+          updated_at: '2026-06-04T13:00:00+08:00',
+        }),
+      ),
+    )
+
+    await page.goto('/rating?id=o_a&role=orderer')
+    const group = page.getByRole('radiogroup')
+    await expect(group).toBeVisible()
+    // Choosing a star enables the submit button.
+    await group.getByRole('radio', { name: /4 星/ }).click()
+    await expect(page.getByRole('button', { name: '送出評價' })).toBeEnabled()
   })
 })

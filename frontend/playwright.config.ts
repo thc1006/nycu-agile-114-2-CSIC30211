@@ -27,6 +27,11 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
+    // The app now gates its interior pages behind a JWT (AG-001): without a
+    // token, useRequireAuth bounces every protected route to /login. Seed a
+    // dummy token into localStorage so the e2e journeys land on the real pages.
+    // Specs that drive the login flow itself simply overwrite it.
+    storageState: './e2e/.auth/state.json',
   },
   expect: {
     // Screenshot stability: freeze animations/caret and tolerate sub-pixel

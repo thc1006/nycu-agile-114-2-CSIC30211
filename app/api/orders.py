@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status
 
 from app.schemas.order import (
     CreateOrderRequest,
+    MyOrdersRole,
     OpenOrderResponse,
     OrderResponse,
     RateOrderRequest,
@@ -48,6 +49,27 @@ async def list_open_orders(
     return await OrderService.list_open_orders()
 
 
+# IMPORTANT: this static-path route MUST stay registered before the dynamic
+# "/{order_id}" route below, otherwise FastAPI matches "mine" as an order_id.
+@router.get(
+    "/mine",
+    response_model=list[OrderResponse],
+)
+async def list_my_orders(
+    role: MyOrdersRole,
+    current_user: dict = Depends(get_current_user),
+):
+    """The caller's own order history, newest first (AG-010).
+
+    ``role=customer`` returns orders they created; ``role=runner`` returns
+    orders they accepted. An invalid role is rejected by FastAPI as 422.
+    """
+    return await OrderService.list_my_orders(
+        user_id=current_user["id"],
+        role=role.value,
+    )
+
+
 @router.get(
     "/{order_id}",
     response_model=OrderResponse,
@@ -72,6 +94,21 @@ async def accept_order(
     return await OrderService.accept_order(
         order_id=order_id,
         runner_id=current_user["id"],
+    )
+
+
+@router.post(
+    "/{order_id}/cancel",
+    response_model=OrderResponse,
+)
+async def cancel_order(
+    order_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Order creator cancels their still-OPEN order (OPEN -> CANCELLED). AG-008."""
+    return await OrderService.cancel_order(
+        order_id=order_id,
+        user_id=current_user["id"],
     )
 
 

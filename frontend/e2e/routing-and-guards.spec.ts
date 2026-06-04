@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures'
 
 test.describe('routing', () => {
   test('renders the landing page at the root', async ({ page }) => {
