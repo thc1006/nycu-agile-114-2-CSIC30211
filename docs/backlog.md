@@ -90,8 +90,10 @@ Product Backlog 依以下原則排序：
 > `https://campuseat.hsuan.app` 以訂餐者與帶餐者兩種身份完成端對端驗證
 > （註冊 → 登入 → 發單 → 接單 → 開始購買 → 已送達 → 確認收餐 → 雙向評價 →
 > 取消待接單 → 歷史訂單 / 收入明細，跨角色狀態以輪詢同步）。AG-001–008、
-> AG-010–012 已 Done；AG-009（通知）為 P2，目前以輪詢提供近即時狀態更新作為
-> 「頁面提示」替代，正式通知遞送延後。
+> AG-010、AG-011 已 Done；AG-009（通知）為 P2，目前以輪詢提供近即時狀態更新作為
+> 「頁面提示」替代，正式通知遞送延後。AG-012（Demo 測試帳號 / 種子資料）已**移除**：
+> 註冊功能上線後改為所有使用者一律自行建立 Email 帳號，不再內建共用測試帳號或預置資料
+> （登入頁的「使用測試帳號」捷徑與 `scripts/seed.py` 一併移除）。
 
 | ID | Story | Priority | Sprint | Estimate | Status |
 |---|---|---|---|---|---|
@@ -107,7 +109,7 @@ Product Backlog 依以下原則排序：
 | AG-009 | Email / 站內通知 | P2 | Sprint 4 | M | Deferred（輪詢提供近即時狀態） |
 | AG-010 | 歷史訂單紀錄 | P2 | Sprint 4 | S | Done |
 | AG-011 | UI / Bug Fix | P0 | Sprint 4 | M | Done |
-| AG-012 | Demo Seed Data | P0 | Sprint 4 | S | Done |
+| AG-012 | Demo Seed Data | P0 | Sprint 4 | S | 移除（改為使用者自行註冊） |
 
 ---
 
@@ -670,7 +672,13 @@ Then 可以完整跑完「發單 → 接單 → 狀態更新 → 確認收餐 �
 **Priority：** P0  
 **Sprint：** Sprint 4  
 **Estimate：** S  
-**Status：** Done  
+**Status：** 移除（descoped, 2026-06-05）  
+
+> **移除原因：** Email 註冊／登入（AG-001）上線且穩定後，內建的共用測試帳號與
+> 預置種子資料已無必要——所有使用者（含期末展示）一律自行註冊 Email 帳號即可進入完整
+> 流程。為避免正式環境殘留測試資料、保持乾淨的展示環境，已移除登入頁的「使用測試帳號
+> （免註冊）」捷徑與 `scripts/seed.py` 種子腳本。需要乾淨環境時直接清空資料即可，不再
+> 重新植入示範帳號。下列原始 User Story / AC 僅保留作為歷史紀錄。
 
 ### User Story
 
