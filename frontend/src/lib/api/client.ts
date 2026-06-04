@@ -16,9 +16,15 @@ const API_BASE = (import.meta.env.VITE_API_BASE ?? 'http://localhost:8000').repl
 
 const TOKEN_KEY = 'ce_token'
 
+// The session token lives in BOTH stores. sessionStorage is per-tab and takes
+// precedence on read, so the 訂餐者 and 帶餐者 can be logged in side-by-side in
+// two tabs of the SAME browser without the single origin-wide localStorage token
+// clobbering each other (which made one tab silently poll as the other account —
+// the "two roles don't sync" bug). The localStorage mirror keeps the user logged
+// in across reloads and seeds a freshly-opened tab with the last session.
 export function getToken(): string | null {
   try {
-    return localStorage.getItem(TOKEN_KEY)
+    return sessionStorage.getItem(TOKEN_KEY) ?? localStorage.getItem(TOKEN_KEY)
   } catch {
     return null
   }
@@ -26,8 +32,13 @@ export function getToken(): string | null {
 
 export function setToken(token: string | null): void {
   try {
-    if (token) localStorage.setItem(TOKEN_KEY, token)
-    else localStorage.removeItem(TOKEN_KEY)
+    if (token) {
+      sessionStorage.setItem(TOKEN_KEY, token)
+      localStorage.setItem(TOKEN_KEY, token)
+    } else {
+      sessionStorage.removeItem(TOKEN_KEY)
+      localStorage.removeItem(TOKEN_KEY)
+    }
   } catch {
     // storage unavailable (e.g. private mode) — non-fatal for the request itself
   }
