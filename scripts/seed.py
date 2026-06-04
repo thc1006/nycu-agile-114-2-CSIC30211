@@ -45,21 +45,22 @@ DEMO_RUNNER = {
     "name": "示範帶餐者",
 }
 
-# Realistic zh-Hant demo orders. expected_time uses ISO strings with a +08:00
-# (Asia/Taipei) offset so they render naturally in the demo UI.
+# Realistic zh-Hant demo orders. expected_time is computed at seed time as the
+# next occurrence of a fixed campus meal window (Asia/Taipei), so the demo feed
+# always shows an *upcoming* deadline — even when the seed is re-run days later.
 DEMO_ORDERS = [
     {
         "restaurant": "二餐自助餐",
         "meal": "排骨便當 + 滷蛋，醬汁分開裝",
         "pickup_location": "資工系館 1F 大廳",
-        "expected_time": "2026-06-04T12:30:00+08:00",
+        "pickup_window": (12, 30),  # lunch
         "delivery_fee": 20,
     },
     {
         "restaurant": "麥當勞 清大店",
         "meal": "大麥克套餐（可樂去冰）",
         "pickup_location": "綜合大樓門口",
-        "expected_time": "2026-06-04T18:15:00+08:00",
+        "pickup_window": (18, 15),  # dinner
         "delivery_fee": 30,
     },
 ]
@@ -105,9 +106,9 @@ async def seed() -> None:
                     restaurant=spec["restaurant"],
                     meal=spec["meal"],
                     pickup_location=spec["pickup_location"],
-                    # create_order serializes via .timestamp()/.isoformat(),
-                    # so it needs a real datetime, not the ISO string.
-                    expected_time=_parse_dt(spec["expected_time"]),
+                    # Always a real, upcoming datetime (create_order serializes
+                    # via .timestamp()/.isoformat()).
+                    expected_time=_next_occurrence(*spec["pickup_window"]),
                     delivery_fee=spec["delivery_fee"],
                 )
                 created_orders.append(order)
@@ -117,10 +118,17 @@ async def seed() -> None:
         await close_redis()
 
 
-def _parse_dt(value: str):
-    from datetime import datetime
+def _next_occurrence(hour: int, minute: int):
+    """The next Asia/Taipei datetime at ``hour:minute`` that is still in the
+    future — today's window if it hasn't passed, otherwise tomorrow's."""
+    from datetime import datetime, timedelta, timezone
 
-    return datetime.fromisoformat(value)
+    taipei = timezone(timedelta(hours=8))
+    now = datetime.now(taipei)
+    target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    if target <= now:
+        target += timedelta(days=1)
+    return target
 
 
 def _print_summary(orderer, runner, existing_open, created_orders) -> None:
