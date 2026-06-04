@@ -13,6 +13,7 @@ Element.prototype.scrollIntoView = vi.fn()
 afterEach(() => {
   cleanup()
   localStorage.clear()
+  sessionStorage.clear()
   document.body.removeAttribute('data-od-id')
   document.body.className = ''
   // renderWithRouter mirrors each test's route onto window.location; reset it so
