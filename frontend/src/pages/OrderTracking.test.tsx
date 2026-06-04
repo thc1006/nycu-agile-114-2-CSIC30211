@@ -107,4 +107,14 @@ describe('OrderTracking — wired to the real API', () => {
     await waitFor(() => expect(navigate).toHaveBeenCalledWith(expect.stringContaining('id=o_new')))
     expect(getOrderFn).not.toHaveBeenCalled() // no id on this render → no fetch
   })
+
+  it('shows the cancelled notice and no stray action for a cancelled order', async () => {
+    getOrderFn.mockResolvedValue(makeOrder({ status: 'CANCELLED' }))
+    renderTracking('?id=o_1&role=orderer')
+
+    expect(await screen.findByText('這筆訂單已取消。')).toBeInTheDocument()
+    // Terminal state: no action button, and not the "帶餐者處理中…" fallback.
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.queryByText(/帶餐者處理中/)).not.toBeInTheDocument()
+  })
 })

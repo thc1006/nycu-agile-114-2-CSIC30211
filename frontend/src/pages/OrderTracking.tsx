@@ -183,6 +183,11 @@ function renderAction(
     </a>
   )
 
+  // A cancelled order is terminal — no action for either party. The timeline
+  // above is already replaced with "這筆訂單已取消", so this avoids the orderer
+  // falling through to the misleading "帶餐者處理中…" copy.
+  if (status === 'CANCELLED') return null
+
   if (role === 'runner') {
     if (status === 'OPEN') return btn('接單', acceptOrder)
     if (status === 'ACCEPTED') return btn('開始購買', startOrder)
