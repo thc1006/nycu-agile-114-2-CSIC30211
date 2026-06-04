@@ -71,8 +71,7 @@ export default function LoginForm() {
         />
       </div>
 
-      <fieldset className="role-pick">
-        <legend>這次要進入哪一種視角？</legend>
+      <fieldset className="role-pick" aria-label="選擇身份">
         <label className="role-opt">
           <input type="radio" name="role" value="orderer"
             checked={role === 'orderer'} onChange={() => setRole('orderer')} />

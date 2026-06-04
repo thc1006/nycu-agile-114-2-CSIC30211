@@ -15,7 +15,6 @@ resources:
 - frontend/deployment.yaml
 - frontend/service.yaml
 - ingress.yaml
-- ops/redis-flushall-job.yaml
   # NOTE: backend-secret is intentionally NOT listed — apply your real
   # secret.yaml (from secret.example.yaml) out-of-band so it never lands in git.
 

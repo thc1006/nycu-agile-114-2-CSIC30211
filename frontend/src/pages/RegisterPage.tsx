@@ -34,7 +34,7 @@ export default function RegisterPage() {
                 <RegisterForm />
               </div>
 
-              <p className="auth-note">註冊完成後會引導你前往登入。兩種身份共用同一個學校帳號,但畫面與資料<strong>完全分開</strong>。</p>
+              <p className="auth-note">註冊完成後會引導你前往登入。</p>
               <p className="auth-foot"><a href="login.html">已有帳號,前往登入</a></p>
             </div>
           </main>
