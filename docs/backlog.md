@@ -86,21 +86,28 @@ Product Backlog 依以下原則排序：
 
 ## 6. Product Backlog 總覽
 
+> **實作進度更新（2026-06-05）：** MVP 交易閉環已完整實作並於正式環境
+> `https://campuseat.hsuan.app` 以訂餐者與帶餐者兩種身份完成端對端驗證
+> （註冊 → 登入 → 發單 → 接單 → 開始購買 → 已送達 → 確認收餐 → 雙向評價 →
+> 取消待接單 → 歷史訂單 / 收入明細，跨角色狀態以輪詢同步）。AG-001–008、
+> AG-010–012 已 Done；AG-009（通知）為 P2，目前以輪詢提供近即時狀態更新作為
+> 「頁面提示」替代，正式通知遞送延後。
+
 | ID | Story | Priority | Sprint | Estimate | Status |
 |---|---|---|---|---|---|
-| AG-000 | Project Setup / 產品探索文件整理 | P0 | Sprint 0 | M | In Progress |
-| AG-001 | Email 註冊與登入 | P0 | Sprint 1 | M | Todo |
-| AG-002 | 發布訂單 | P0 | Sprint 1 | M | Todo |
-| AG-003 | 瀏覽待接訂單列表 | P0 | Sprint 1 | S | Todo |
-| AG-004 | 接單 | P0 | Sprint 2 | M | Todo |
-| AG-005 | 更新訂單狀態 | P0 | Sprint 2–3 | M | Todo |
-| AG-006 | 確認收餐 | P0 | Sprint 3 | S | Todo |
-| AG-007 | 雙向評價 | P1 | Sprint 3 | M | Todo |
-| AG-008 | 取消訂單 | P1 | Sprint 4 | S | Todo |
-| AG-009 | Email / 站內通知 | P2 | Sprint 4 | M | Optional |
-| AG-010 | 歷史訂單紀錄 | P2 | Sprint 4 | S | Optional |
-| AG-011 | UI / Bug Fix | P0 | Sprint 4 | M | Todo |
-| AG-012 | Demo Seed Data | P0 | Sprint 4 | S | Todo |
+| AG-000 | Project Setup / 產品探索文件整理 | P0 | Sprint 0 | M | Done |
+| AG-001 | Email 註冊與登入 | P0 | Sprint 1 | M | Done |
+| AG-002 | 發布訂單 | P0 | Sprint 1 | M | Done |
+| AG-003 | 瀏覽待接訂單列表 | P0 | Sprint 1 | S | Done |
+| AG-004 | 接單 | P0 | Sprint 2 | M | Done |
+| AG-005 | 更新訂單狀態 | P0 | Sprint 2–3 | M | Done |
+| AG-006 | 確認收餐 | P0 | Sprint 3 | S | Done |
+| AG-007 | 雙向評價 | P1 | Sprint 3 | M | Done |
+| AG-008 | 取消訂單 | P1 | Sprint 4 | S | Done |
+| AG-009 | Email / 站內通知 | P2 | Sprint 4 | M | Deferred（輪詢提供近即時狀態） |
+| AG-010 | 歷史訂單紀錄 | P2 | Sprint 4 | S | Done |
+| AG-011 | UI / Bug Fix | P0 | Sprint 4 | M | Done |
+| AG-012 | Demo Seed Data | P0 | Sprint 4 | S | Done |
 
 ---
 
@@ -111,7 +118,7 @@ Product Backlog 依以下原則排序：
 **Priority：** P0  
 **Sprint：** Sprint 0  
 **Estimate：** M  
-**Status：** In Progress  
+**Status：** Done  
 
 ### User Story
 
@@ -148,7 +155,7 @@ Then PM / Scrum Master 需要記錄問題並在 Planning 前釐清
 **Priority：** P0  
 **Sprint：** Sprint 1  
 **Estimate：** M  
-**Status：** Todo  
+**Status：** Done  
 
 ### User Story
 
@@ -197,7 +204,7 @@ And 我仍停留在登入頁
 **Priority：** P0  
 **Sprint：** Sprint 1  
 **Estimate：** M  
-**Status：** Todo  
+**Status：** Done  
 
 ### User Story
 
@@ -248,7 +255,7 @@ Then 帶餐者可以看到該訂單的餐廳、餐點摘要、取餐地點、期
 **Priority：** P0  
 **Sprint：** Sprint 1  
 **Estimate：** S  
-**Status：** Todo  
+**Status：** Done  
 
 ### User Story
 
@@ -296,7 +303,7 @@ Then 系統顯示「目前沒有可接訂單」的提示
 **Priority：** P0  
 **Sprint：** Sprint 2  
 **Estimate：** M  
-**Status：** Todo  
+**Status：** Done  
 
 ### User Story
 
@@ -347,7 +354,7 @@ Then 我可以看到完整餐點內容、取餐地點、期望時間與帶餐費
 **Priority：** P0  
 **Sprint：** Sprint 2–3  
 **Estimate：** M  
-**Status：** Todo  
+**Status：** Done  
 
 ### User Story
 
@@ -404,7 +411,7 @@ Then 訂餐者可以看到最新訂單狀態
 **Priority：** P0  
 **Sprint：** Sprint 3  
 **Estimate：** S  
-**Status：** Todo  
+**Status：** Done  
 
 ### User Story
 
@@ -452,7 +459,7 @@ Then 我可以看到這筆已完成的訂單
 **Priority：** P1  
 **Sprint：** Sprint 3  
 **Estimate：** M  
-**Status：** Todo  
+**Status：** Done  
 
 ### User Story
 
@@ -508,7 +515,7 @@ And 系統不允許我修改評價
 **Priority：** P1  
 **Sprint：** Sprint 4  
 **Estimate：** S  
-**Status：** Todo  
+**Status：** Done  
 
 ### User Story
 
@@ -552,7 +559,7 @@ Then 系統不允許取消
 **Priority：** P2  
 **Sprint：** Sprint 4  
 **Estimate：** M  
-**Status：** Optional  
+**Status：** Deferred（以輪詢提供近即時狀態更新作為頁面提示替代）  
 
 ### User Story
 
@@ -595,7 +602,7 @@ Then 帶餐者收到接單成功通知
 **Priority：** P2  
 **Sprint：** Sprint 4  
 **Estimate：** S  
-**Status：** Optional  
+**Status：** Done  
 
 ### User Story
 
@@ -629,7 +636,7 @@ Then 每筆訂單會顯示目前狀態
 **Priority：** P0  
 **Sprint：** Sprint 4  
 **Estimate：** M  
-**Status：** Todo  
+**Status：** Done  
 
 ### User Story
 
@@ -663,7 +670,7 @@ Then 可以完整跑完「發單 → 接單 → 狀態更新 → 確認收餐 �
 **Priority：** P0  
 **Sprint：** Sprint 4  
 **Estimate：** S  
-**Status：** Todo  
+**Status：** Done  
 
 ### User Story
 
