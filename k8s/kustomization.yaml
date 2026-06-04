@@ -3,6 +3,7 @@ kind: Kustomization
 
 namespace: campuseats
 
+# One-shot Redis wipe for a clean test/demo environment (removed after it runs).
 resources:
 - namespace.yaml
 - redis/statefulset.yaml
@@ -14,7 +15,6 @@ resources:
 - frontend/deployment.yaml
 - frontend/service.yaml
 - ingress.yaml
-# One-shot Redis wipe for a clean test/demo environment (removed after it runs).
 - ops/redis-flushall-job.yaml
   # NOTE: backend-secret is intentionally NOT listed — apply your real
   # secret.yaml (from secret.example.yaml) out-of-band so it never lands in git.
@@ -24,7 +24,7 @@ resources:
 images:
 - name: ghcr.io/thc1006/campuseats-backend
   newName: ghcr.io/thc1006/campuseats-backend
-  newTag: sha-1cbe75d639da
+  newTag: sha-8e9aa34b76b6
 - name: ghcr.io/thc1006/campuseats-frontend
   newName: ghcr.io/thc1006/campuseats-frontend
-  newTag: sha-1cbe75d639da
+  newTag: sha-8e9aa34b76b6
