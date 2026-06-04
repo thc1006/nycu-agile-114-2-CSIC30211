@@ -6,10 +6,13 @@ import { ApiError } from '../lib/api/client'
 const ROLE_KEY = 'campuseats.role'
 type Role = 'orderer' | 'runner'
 
-// Shared demo account for the course demo (backend has no real email verification).
-// The quick-login button below ensures it exists, then logs in — role is chosen
-// per session, so the one account works as either orderer or runner.
-const DEMO_ACCOUNT = { email: 'demo@campuseats.app', password: 'demo1234', name: 'Demo 同學' }
+// Separate demo accounts for the course demo. A runner cannot accept their own
+// backend order, so using one shared demo user for both roles breaks the
+// post-order → runner-accept → tracking flow.
+const DEMO_ACCOUNTS: Record<Role, { email: string; password: string; name: string }> = {
+  orderer: { email: 'demo-orderer@campuseats.app', password: 'demo1234', name: 'Demo 訂餐者' },
+  runner: { email: 'demo-runner@campuseats.app', password: 'demo1234', name: 'Demo 帶餐者' },
+}
 
 function homePath(role: Role): string {
   return role === 'runner' ? '/feed?role=runner' : '/dashboard?role=orderer'
@@ -62,13 +65,14 @@ export default function LoginForm() {
     setError('')
     setSubmitting(true)
     try {
-      // ensure the shared demo account exists; ignore "already registered"
+      // ensure the role-specific demo account exists; ignore "already registered"
+      const account = DEMO_ACCOUNTS[role]
       try {
-        await register(DEMO_ACCOUNT)
+        await register(account)
       } catch (err) {
         if (!(err instanceof ApiError && err.status === 409)) throw err
       }
-      await login({ email: DEMO_ACCOUNT.email, password: DEMO_ACCOUNT.password })
+      await login({ email: account.email, password: account.password })
       try {
         localStorage.setItem(ROLE_KEY, role)
       } catch {

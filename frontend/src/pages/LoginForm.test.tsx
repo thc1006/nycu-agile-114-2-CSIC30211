@@ -86,10 +86,10 @@ describe('LoginForm — wired to the real API', () => {
     expect(await screen.findByText(/請輸入有效的學校 Email/)).toBeInTheDocument()
   })
 
-  // Demo quick-login (course-demo convenience): ensure a shared demo account
+  // Demo quick-login (course-demo convenience): ensure a role-specific demo account
   // exists (register, tolerating 409) then log in with the selected role.
   it('demo quick-login: ensures the demo account then logs in and routes by role', async () => {
-    registerFn.mockResolvedValue({ id: 'u_demo', email: 'demo@campuseats.app', name: 'Demo 同學' })
+    registerFn.mockResolvedValue({ id: 'u_demo_runner', email: 'demo-runner@campuseats.app', name: 'Demo 帶餐者' })
     loginFn.mockResolvedValue({ access_token: 't', token_type: 'bearer' })
     renderForm('runner')
     await userEvent.click(screen.getByRole('button', { name: /使用測試帳號/ }))
@@ -97,8 +97,8 @@ describe('LoginForm — wired to the real API', () => {
     // demoLogin awaits register→login before navigating (two async hops); wait for it.
     await waitFor(() => expect(navigate).toHaveBeenCalledWith('/feed?role=runner'))
     // pins the "ensure account exists" contract: register IS called before login.
-    expect(registerFn).toHaveBeenCalledWith({ email: 'demo@campuseats.app', password: 'demo1234', name: 'Demo 同學' })
-    expect(loginFn).toHaveBeenCalledWith({ email: 'demo@campuseats.app', password: 'demo1234' })
+    expect(registerFn).toHaveBeenCalledWith({ email: 'demo-runner@campuseats.app', password: 'demo1234', name: 'Demo 帶餐者' })
+    expect(loginFn).toHaveBeenCalledWith({ email: 'demo-runner@campuseats.app', password: 'demo1234' })
     expect(localStorage.getItem('campuseats.role')).toBe('runner')
   })
 
