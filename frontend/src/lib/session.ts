@@ -7,7 +7,7 @@
 // order?" is derived from the server's customer_id/runner_id, not the URL.
 
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { getToken, ApiError } from './api/client'
 import { me, logout as clearToken, type CurrentUser } from './api/auth'
 import type { OrderResponse } from './api/orders'
@@ -53,12 +53,18 @@ interface AuthState {
  */
 export function useRequireAuth(): AuthState {
   const navigate = useNavigate()
+  const location = useLocation()
   const [state, setState] = useState<AuthState>({ user: null, loading: true })
 
   useEffect(() => {
     let alive = true
     if (!getToken()) {
-      navigate('/login', { replace: true })
+      // Guard against re-navigating when we're already on /login. Without this,
+      // a test harness that mounts a single page at path="*" would re-render the
+      // same gated page at /login and loop (PageChrome re-keys its subtree on
+      // each navigation, remounting this hook). In the real app /login renders
+      // LoginPage, so the redirect happens exactly once.
+      if (location.pathname !== '/login') navigate('/login', { replace: true })
       return
     }
     void me()
@@ -79,7 +85,7 @@ export function useRequireAuth(): AuthState {
     return () => {
       alive = false
     }
-  }, [navigate])
+  }, [navigate, location.pathname])
 
   return state
 }
