@@ -1,7 +1,15 @@
 {
   "name": "campus-eats-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "CampusEats — peer-to-peer campus meal-pickup matching platform (React + Vite + TypeScript frontend).",
+  "license": "GPL-3.0-or-later",
+  "author": "NYCU CSIC30211 — team thc1006",
+  "homepage": "https://campuseat.hsuan.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thc1006/nycu-agile-114-2-CSIC30211.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

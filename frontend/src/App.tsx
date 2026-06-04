@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router'
 import { ErrorBoundary } from './ErrorBoundary'
+import AboutPage from './pages/AboutPage'
 import DashboardPage from './pages/DashboardPage'
 import FeedPage from './pages/FeedPage'
 import HistoryDetailPage from './pages/HistoryDetailPage'
@@ -17,6 +18,7 @@ import RunnerEarningsPage from './pages/RunnerEarningsPage'
 import RunnerReviewsPage from './pages/RunnerReviewsPage'
 
 const routes = [
+  { id: "about", Component: AboutPage },
   { id: "dashboard", Component: DashboardPage },
   { id: "feed", Component: FeedPage },
   { id: "history-detail", Component: HistoryDetailPage },

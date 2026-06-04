@@ -20,6 +20,7 @@ export default function LandingPage() {
                 <a href="#how">怎麼運作</a>
                 <a href="#roles">兩種身份</a>
                 <a href="#trust">狀態與信任</a>
+                <a href="about.html">關於</a>
               </nav>
               <span className="topbar__spacer"></span>
               <div className="topbar__actions">

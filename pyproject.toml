@@ -2,6 +2,23 @@
 # Kept tool-only so `pytest -q` still works without pytest-cov installed;
 # CI passes the --cov flags explicitly.
 
+# PEP 621 project metadata (the "About" for the backend service). This is
+# metadata only — the app is run via uvicorn, not pip-installed — so no
+# [build-system] is declared and the quality-gate tools below are unaffected.
+[project]
+name = "campuseats"
+version = "1.0.0"
+description = "CampusEats — a peer-to-peer campus meal-pickup matching platform (FastAPI + Redis backend)."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "NYCU CSIC30211 — team thc1006" }]
+keywords = ["fastapi", "redis", "campus", "food-delivery", "agile", "scrum", "mvp"]
+
+[project.urls]
+Homepage = "https://campuseat.hsuan.app"
+Repository = "https://github.com/thc1006/nycu-agile-114-2-CSIC30211"
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"

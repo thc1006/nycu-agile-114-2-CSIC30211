@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getUserRating, type UserRatingResponse } from '../lib/api/ratings'
 import { ApiError } from '../lib/api/client'
 import { currentRole, useLogout, useRequireAuth } from '../lib/session'
+import { APP_VERSION } from '../lib/appInfo'
 
 function friendly(err: unknown, fallback: string): string {
   return err instanceof ApiError && err.status !== 0 ? err.detail : fallback
@@ -181,6 +182,25 @@ export default function Profile() {
                 </span>
                 <span className="ro">站內 · 已開啟</span>
               </div>
+              <a className="rowlink" href="about.html">
+                <span className="rowflex">
+                  <span className="rowlink__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 16v-4M12 8h.01" />
+                    </svg>
+                  </span>
+                  關於 CampusEats
+                </span>
+                <span className="rowflex">
+                  <span className="ro">v{APP_VERSION}</span>
+                  <span className="rowlink__chev">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                  </span>
+                </span>
+              </a>
             </div>
           </section>
         </div>

@@ -207,7 +207,7 @@ export function PageChrome({ pageId, title, bodyAttrs, scripts = [], children }:
               <span className="site-footer__tag">校園帶餐媒合 · 順路的同學幫你帶</span>
             </div>
             <nav className="site-footer__nav" aria-label="頁尾連結">
-              <button type="button" onClick={(event) => event.preventDefault()}>關於我們</button>
+              <button type="button" onClick={() => navigate('/about')}>關於我們</button>
               <button type="button" onClick={(event) => event.preventDefault()}>使用條款</button>
               <button type="button" onClick={(event) => event.preventDefault()}>隱私權政策</button>
               <button type="button" onClick={(event) => event.preventDefault()}>意見回饋</button>

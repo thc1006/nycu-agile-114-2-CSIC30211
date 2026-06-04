@@ -1,8 +1,10 @@
-# nycu-agile-114-2-CSIC30211
+# CampusEats — Backend
 
-CampusEats backend for AG-000 to AG-004.
+The CampusEats backend service: the `app/` FastAPI package of the monorepo. For the
+product overview, full architecture, and frontend, see the top-level
+[README](../README.md) and [architecture doc](architecture.md).
 
-This backend currently supports:
+This backend implements the MVP (AG-000 to AG-007, plus cancel/history) and supports:
 
 * AG-000: Project setup, FastAPI app, Redis connection, health check
 * AG-001: Email registration and login
@@ -484,7 +486,7 @@ python -m pytest -q
 Expected result:
 
 ```text
-39 passed
+83 passed
 ```
 
 Warnings may appear, but they do not mean the tests failed. The important part is that all tests pass.
@@ -565,7 +567,7 @@ zsh: permission denied: ./scripts/run-tests.sh
 Expected result:
 
 ```text
-39 passed
+83 passed
 ```
 
 ---
@@ -599,7 +601,7 @@ Tests failed. Push aborted.
 ### Start backend
 
 ```bash
-cd ~/Downloads/nycu-agile-114-2-CSIC30211
+cd /path/to/CampusEats   # the repo root
 source .venv/bin/activate
 brew services start redis
 uvicorn app.main:app --reload
@@ -610,7 +612,7 @@ uvicorn app.main:app --reload
 ### Run tests
 
 ```bash
-cd ~/Downloads/nycu-agile-114-2-CSIC30211
+cd /path/to/CampusEats   # the repo root
 source .venv/bin/activate
 brew services start redis
 python -m pytest -q
@@ -638,6 +640,14 @@ python -m pytest -q
 | AG-005 | 更新訂單狀態                   | P0       | Sprint 2 | M        | Done   |
 | AG-006 | 確認收餐                     | P0       | Sprint 3 | S        | Done   |
 | AG-007 | 雙向評價                     | P1       | Sprint 3 | M        | Done   |
+| AG-008 | 取消訂單                     | P1       | Sprint 4 | S        | Done   |
+| AG-009 | Email / 站內通知             | P2       | Sprint 4 | M        | Deferred(以輪詢替代) |
+| AG-010 | 歷史訂單紀錄                  | P2       | Sprint 4 | S        | Done   |
+| AG-011 | UI / Bug Fix              | P0       | Sprint 4 | M        | Done   |
+| AG-012 | Demo Seed Data           | ~~P0~~   | Sprint 4 | S        | 移除(descoped) |
+
+> Authoritative status lives in [`backlog.md`](backlog.md). AG-012 (demo seed
+> data) was removed — all users self-register; there is no seed step.
 
 ---
 
