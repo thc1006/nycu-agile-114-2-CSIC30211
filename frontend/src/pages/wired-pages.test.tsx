@@ -7,6 +7,7 @@ import type { ReactElement } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
+import { ApiError } from '../lib/api/client'
 
 const h = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -225,5 +226,84 @@ describe('Profile / Reviews / Earnings', () => {
     renderAt(<RunnerEarnings />, '/runner-earnings?role=runner')
     expect(await screen.findByText(/二餐自助餐/)).toBeInTheDocument()
     expect(h.listMyOrders).toHaveBeenCalledWith('runner')
+  })
+})
+
+// Error + edge branches: the catch paths, friendly() formatting, and the
+// alternate status/role branches that the happy-path tests don't reach.
+describe('error and edge branches', () => {
+  const boom = () => new ApiError(500, 'boom-detail')
+
+  it('Feed surfaces a load error', async () => {
+    h.listOpenOrders.mockRejectedValue(boom())
+    renderAt(<Feed />, '/feed?role=runner')
+    expect(await screen.findByText(/boom-detail/)).toBeInTheDocument()
+  })
+
+  it('MyOrders surfaces a load error', async () => {
+    h.listMyOrders.mockRejectedValue(boom())
+    renderAt(<MyOrders />, '/my-orders?role=orderer')
+    expect(await screen.findByText(/boom-detail/)).toBeInTheDocument()
+  })
+
+  it('Dashboard surfaces a load error', async () => {
+    h.listMyOrders.mockRejectedValue(boom())
+    renderAt(<Dashboard />, '/dashboard?role=orderer')
+    expect(await screen.findByText(/boom-detail/)).toBeInTheDocument()
+  })
+
+  it('OrderDetail surfaces a load error', async () => {
+    h.getOrder.mockRejectedValue(boom())
+    renderAt(<OrderDetail />, '/order-detail?id=o_1&role=runner')
+    expect(await screen.findByText(/boom-detail/)).toBeInTheDocument()
+  })
+
+  it('OrderDetail shows the "already yours" branch for a non-open order you hold', async () => {
+    h.getOrder.mockResolvedValue(fullOrder({ status: 'ACCEPTED', runner_id: 'u_buyer' }))
+    renderAt(<OrderDetail />, '/order-detail?id=o_1&role=runner')
+    expect(await screen.findByText(/前往配送流程/)).toBeInTheDocument()
+  })
+
+  it('PostOrder blocks an empty submit with a validation message', async () => {
+    renderAt(<PostOrder />, '/post-order?role=orderer')
+    await userEvent.click(await screen.findByRole('button', { name: /發布帶餐需求/ }))
+    expect(await screen.findByText(/請填寫餐廳/)).toBeInTheDocument()
+    expect(h.createOrder).not.toHaveBeenCalled()
+  })
+
+  it('Rating maps the already-rated conflict', async () => {
+    h.getOrder.mockResolvedValue(fullOrder({ status: 'COMPLETED' }))
+    h.rateOrder.mockRejectedValue(new ApiError(409, 'You have already rated this order'))
+    renderAt(<Rating />, '/rating?id=o_1&role=orderer')
+    await userEvent.click(await screen.findByRole('radio', { name: /4 星/ }))
+    await userEvent.click(screen.getByRole('button', { name: /送出評價/ }))
+    expect(await screen.findByText(/已經評價過/)).toBeInTheDocument()
+  })
+
+  it('Rating maps the not-completed conflict', async () => {
+    h.getOrder.mockResolvedValue(fullOrder({ status: 'COMPLETED' }))
+    h.rateOrder.mockRejectedValue(new ApiError(409, 'Order must be completed before it can be rated'))
+    renderAt(<Rating />, '/rating?id=o_1&role=orderer')
+    await userEvent.click(await screen.findByRole('radio', { name: /3 星/ }))
+    await userEvent.click(screen.getByRole('button', { name: /送出評價/ }))
+    expect(await screen.findByText(/訂單完成後才能評價/)).toBeInTheDocument()
+  })
+
+  it('Profile falls back to an error caption when the rating load fails', async () => {
+    h.getUserRating.mockRejectedValue(boom())
+    renderAt(<Profile />, '/profile?role=orderer')
+    expect(await screen.findByText(/boom-detail/)).toBeInTheDocument()
+  })
+
+  it('RunnerEarnings counts in-progress runs with no completed income', async () => {
+    h.listMyOrders.mockResolvedValue([fullOrder({ status: 'ACCEPTED' })])
+    renderAt(<RunnerEarnings />, '/runner-earnings?role=runner')
+    expect(await screen.findByText(/尚無完成的帶單收入/)).toBeInTheDocument()
+  })
+
+  it('Reviews surface a load error', async () => {
+    h.getUserRating.mockRejectedValue(boom())
+    renderAt(<OrdererReviews />, '/orderer-reviews?role=orderer')
+    expect(await screen.findByText(/boom-detail/)).toBeInTheDocument()
   })
 })
