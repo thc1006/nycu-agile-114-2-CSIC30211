@@ -33,13 +33,12 @@ export default function LandingPage() {
           <section className="hero" data-od-id="hero">
             <div className="wrap hero__inner">
               <div>
-                <h1>沒空買飯，<br />就交給順路的同學。</h1>
-                <p className="lead">CampusEats 把校園裡分散在群組的「幫忙帶餐」需求集中起來：清楚發單、即時接單、全程狀態追蹤、雙向評價。學生幫學生的互助帶餐，現在能直接在瀏覽器裡操作。</p>
+                <h1>沒空買飯，<br />就交給順路的<span style={{ whiteSpace: "nowrap" }}>同學。</span></h1>
+                <p className="lead">CampusEats 把校園裡分散在群組的「幫忙帶餐」需求集中起來：清楚發單、即時接單、全程狀態追蹤、雙向評價。學生幫學生的互助帶餐。</p>
                 <div className="hero__cta">
                   <a className="btn btn-black btn--lg" href="register.html">開始使用</a>
                   <a className="btn btn-line btn--lg" href="#how">看怎麼運作</a>
                 </div>
-                <p className="hero__note">免下載 · 用學校 Email 登入 · 訂餐者與帶餐者各自獨立的體驗</p>
               </div>
               <div className="browser" aria-hidden="true">
                 <div className="browser__bar"><i></i><i></i><i></i><span className="browser__url">campuseats.app/feed</span></div>
@@ -86,7 +85,7 @@ export default function LandingPage() {
                     <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>標準化表單，餐點與客製寫清楚</li>
                     <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>狀態時間軸，不必一直私訊問進度</li>
                   </ul>
-                  <a className="btn btn-black btn--block" href="login.html?role=orderer">以訂餐者開始</a>
+                  <a className="btn btn-black btn--block" href="register.html?role=orderer">以訂餐者開始</a>
                 </div>
                 <div className="card">
                   <span className="role-k">帶餐者</span>
@@ -96,7 +95,7 @@ export default function LandingPage() {
                     <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>接單前看清餐廳、地點、時間、報酬</li>
                     <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>接單即鎖定，收入明細一目了然</li>
                   </ul>
-                  <a className="btn btn-white btn--block" href="login.html?role=runner">以帶餐者開始</a>
+                  <a className="btn btn-white btn--block" href="register.html?role=runner">以帶餐者開始</a>
                 </div>
               </div>
             </div>
