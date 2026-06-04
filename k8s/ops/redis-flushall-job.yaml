@@ -11,7 +11,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: redis-flushall-20260605
+  name: redis-flushall-20260605b
   labels:
     app.kubernetes.io/part-of: campuseats
     app.kubernetes.io/component: ops-oneshot
