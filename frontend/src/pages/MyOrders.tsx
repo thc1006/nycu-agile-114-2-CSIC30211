@@ -100,13 +100,13 @@ export default function MyOrders() {
         <h1>{heading}</h1>
       </div>
 
-      <div className="seg-tabs" role="tablist" aria-label="訂單篩選">
+      <div className="seg-tabs" role="group" aria-label="訂單篩選">
         {FILTERS.map((tab) => (
           <button
             key={tab.key}
             type="button"
             className={filter === tab.key ? 'is-active' : undefined}
-            aria-selected={filter === tab.key}
+            aria-pressed={filter === tab.key}
             onClick={() => setFilter(tab.key)}
           >
             {tab.label}
