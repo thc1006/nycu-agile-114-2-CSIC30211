@@ -89,6 +89,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List My Orders
+         * @description The caller's own order history, newest first (AG-010).
+         *
+         *     ``role=customer`` returns orders they created; ``role=runner`` returns
+         *     orders they accepted. An invalid role is rejected by FastAPI as 422.
+         */
+        get: operations["list_my_orders_orders_mine_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orders/{order_id}": {
         parameters: {
             query?: never;
@@ -117,6 +140,26 @@ export interface paths {
         put?: never;
         /** Accept Order */
         post: operations["accept_order_orders__order_id__accept_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{order_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel Order
+         * @description Order creator cancels their still-OPEN order (OPEN -> CANCELLED). AG-008.
+         */
+        post: operations["cancel_order_orders__order_id__cancel_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -304,6 +347,12 @@ export interface components {
             /** Password */
             password: string;
         };
+        /**
+         * MyOrdersRole
+         * @description Which side of an order the caller wants their history for (AG-010).
+         * @enum {string}
+         */
+        MyOrdersRole: "customer" | "runner";
         /** OpenOrderResponse */
         OpenOrderResponse: {
             /** Id */
@@ -586,6 +635,37 @@ export interface operations {
             };
         };
     };
+    list_my_orders_orders_mine_get: {
+        parameters: {
+            query: {
+                role: components["schemas"]["MyOrdersRole"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_order_orders__order_id__get: {
         parameters: {
             query?: never;
@@ -618,6 +698,37 @@ export interface operations {
         };
     };
     accept_order_orders__order_id__accept_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_order_orders__order_id__cancel_post: {
         parameters: {
             query?: never;
             header?: never;

@@ -13,6 +13,13 @@ class OrderStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
+class MyOrdersRole(str, Enum):
+    """Which side of an order the caller wants their history for (AG-010)."""
+
+    customer = "customer"
+    runner = "runner"
+
+
 class CreateOrderRequest(BaseModel):
     restaurant: str = Field(..., min_length=1, max_length=100)
     meal: str = Field(..., min_length=1, max_length=500)

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures'
 
 // Wired order-tracking: the page reads ?id=, calls the real getOrder + FSM
 // action endpoints, and polls for near-real-time updates. The backend is stubbed

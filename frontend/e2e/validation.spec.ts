@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures'
 
 // Form VALIDATION-FAILURE coverage. The happy paths are exercised elsewhere;
 // these pin the error branches the backend contract will hit first — required
@@ -6,44 +6,51 @@ import { test, expect } from '@playwright/test'
 // mocked, so we assert the frontend's own validation behaviour.
 
 test.describe('post-order validation', () => {
-  test('blocks an empty submission, surfaces the error, and focuses the first bad field', async ({
-    page,
-  }) => {
-    await page.goto('/post-order?role=orderer')
-
-    // Nothing filled in (restaurant / items / time are all empty; 取餐地點
-    // defaults to the saved dropoff). Try to continue.
-    await page.getByRole('button', { name: '檢視並確認' }).click()
-
-    // The success overlay must NOT appear...
-    await expect(page.locator('#successScreen')).toBeHidden()
-    // ...the error alert is shown...
-    await expect(page.locator('#orderError')).toBeVisible()
-    await expect(page.locator('#orderError')).toContainText('無法訂餐')
-    // ...the first required field is flagged and focused...
-    await expect(page.locator('.field:has(#restaurant)')).toHaveClass(/has-error/)
-    await expect(page.locator('#restaurant')).toBeFocused()
-    // ...and the blocking toast fired.
-    await expect(page.locator('.toast-wrap')).toContainText('無法訂餐')
+  const json = (b: unknown) => ({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify(b),
   })
 
-  test('clears the error and submits once the required fields are filled', async ({ page }) => {
+  test('blocks an empty submission, surfaces the error, and does not navigate', async ({ page }) => {
     await page.goto('/post-order?role=orderer')
-    await page.getByRole('button', { name: '檢視並確認' }).click()
-    await expect(page.locator('#orderError')).toBeVisible()
 
-    // Fill the required fields (free-text items for a menu-less shop).
-    await page.locator('#restaurant').fill('小確幸早餐店')
-    await page.locator('#freeItems').fill('蛋餅 ×1、奶茶微糖少冰 ×1')
-    await page.locator('#time').selectOption({ label: '12:30 前' })
+    // Nothing filled in (restaurant / meal / time are all empty). Try to submit.
+    await page.getByRole('button', { name: '發布帶餐需求' }).click()
 
-    // The inline error clears as the fields become valid...
-    await expect(page.locator('#orderError')).toBeHidden()
+    // The inline error is shown and the page does NOT navigate.
+    await expect(page.getByText('請填寫餐廳')).toBeVisible()
+    await expect(page).toHaveURL(/\/post-order/)
+  })
 
-    // ...and submitting now reaches the success screen with a system fee.
-    await page.getByRole('button', { name: '檢視並確認' }).click()
-    await expect(page.locator('#successScreen')).toBeVisible()
-    await expect(page.locator('#sumFee')).toContainText('$')
+  test('submits once the required fields are filled', async ({ page }) => {
+    const order = {
+      id: 'o_v',
+      customer_id: 'u_me',
+      runner_id: null,
+      restaurant: '小確幸早餐店',
+      meal: '蛋餅 ×1、奶茶微糖少冰 ×1',
+      pickup_location: '資工系館',
+      expected_time: '2026-06-10T12:30:00+08:00',
+      delivery_fee: 20,
+      status: 'OPEN',
+      created_at: '2026-06-04T10:00:00+08:00',
+      updated_at: '2026-06-04T10:00:00+08:00',
+    }
+
+    await page.route((u) => u.pathname.endsWith('/auth/me'), (r) =>
+      r.fulfill(json({ id: 'u_me', email: 'me@campus.edu', name: '我' })),
+    )
+    await page.route((u) => u.pathname.endsWith('/orders'), (r) => r.fulfill(json(order)))
+    await page.route((u) => u.pathname.endsWith('/orders/o_v'), (r) => r.fulfill(json(order)))
+
+    await page.goto('/post-order?role=orderer')
+    await page.getByLabel('餐廳 / 店家').fill('小確幸早餐店')
+    await page.getByLabel('餐點內容').fill('蛋餅 ×1、奶茶微糖少冰 ×1')
+    await page.getByLabel('期望送達時間').selectOption({ label: '12:30 前' })
+
+    await page.getByRole('button', { name: '發布帶餐需求' }).click()
+    await expect(page).toHaveURL(/order-tracking\?id=o_v/)
   })
 })
 

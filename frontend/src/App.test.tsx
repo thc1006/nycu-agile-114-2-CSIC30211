@@ -17,7 +17,12 @@ function activeRoute(container: HTMLElement): string | null {
 }
 
 describe('App routing', () => {
-  beforeEach(() => localStorage.clear())
+  // A stored token keeps the pages' auth-gate (useRequireAuth) from redirecting
+  // to /login: these tests exercise routing + role guards, not authentication.
+  beforeEach(() => {
+    localStorage.clear()
+    localStorage.setItem('ce_token', 'test-token')
+  })
 
   it('renders the index page at "/"', () => {
     const { container } = renderApp('/')
@@ -36,7 +41,12 @@ describe('App routing', () => {
 })
 
 describe('App role guards (orderer / runner separation)', () => {
-  beforeEach(() => localStorage.clear())
+  // A stored token keeps the pages' auth-gate (useRequireAuth) from redirecting
+  // to /login: these tests exercise routing + role guards, not authentication.
+  beforeEach(() => {
+    localStorage.clear()
+    localStorage.setItem('ce_token', 'test-token')
+  })
 
   it('lets a runner view the runner feed', async () => {
     const { container } = renderApp('/feed?role=runner')
@@ -60,7 +70,12 @@ describe('App role guards (orderer / runner separation)', () => {
 })
 
 describe('client-side link interception', () => {
-  beforeEach(() => localStorage.clear())
+  // A stored token keeps the pages' auth-gate (useRequireAuth) from redirecting
+  // to /login: these tests exercise routing + role guards, not authentication.
+  beforeEach(() => {
+    localStorage.clear()
+    localStorage.setItem('ce_token', 'test-token')
+  })
 
   it('intercepts a legacy .html anchor and navigates within the SPA', async () => {
     const user = userEvent.setup()

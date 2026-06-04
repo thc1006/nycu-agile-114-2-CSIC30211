@@ -145,6 +145,48 @@ class OrderRepository:
         await redis_client.sadd(f"orders:by_runner:{runner_id}", order_id)
 
     @staticmethod
+    async def _hydrate_orders(order_ids: list[str]) -> list[dict[str, Any]]:
+        """Resolve a list of order ids into full order dicts, dropping any
+        ids that no longer resolve (stale index entries)."""
+        orders: list[dict[str, Any]] = []
+
+        for order_id in order_ids:
+            order = await OrderRepository.get_order_by_id(order_id)
+
+            if order is None:
+                continue
+
+            orders.append(order)
+
+        return orders
+
+    @staticmethod
+    async def list_customer_orders(user_id: str) -> list[dict[str, Any]]:
+        """Hydrate every order this user created (AG-010).
+
+        Reads the ``orders:by_customer:{user_id}`` index SET that ``create_order``
+        maintains. Stale ids (missing order) are silently skipped.
+        """
+        redis_client = get_redis()
+
+        order_ids = await redis_client.smembers(f"orders:by_customer:{user_id}")
+
+        return await OrderRepository._hydrate_orders(list(order_ids))
+
+    @staticmethod
+    async def list_runner_orders(user_id: str) -> list[dict[str, Any]]:
+        """Hydrate every order this user accepted as the runner (AG-010).
+
+        Reads the ``orders:by_runner:{user_id}`` index SET that ``accept_order``
+        maintains. Stale ids (missing order) are silently skipped.
+        """
+        redis_client = get_redis()
+
+        order_ids = await redis_client.smembers(f"orders:by_runner:{user_id}")
+
+        return await OrderRepository._hydrate_orders(list(order_ids))
+
+    @staticmethod
     async def acquire_order_lock(order_id: str, lock_value: str) -> bool:
         """Acquire the per-order mutation lock (accept / status transitions).
 
