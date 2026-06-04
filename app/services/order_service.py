@@ -16,7 +16,9 @@ from app.repositories.order_repo import OrderRepository
 #   ACCEPTED -> BUYING : "start"    (runner)
 #   BUYING -> DELIVERED: "deliver"  (runner)
 #   DELIVERED -> COMPLETED: "confirm" (orderer / customer)
-# CANCELLED (OPEN -> CANCELLED) is AG-008 and intentionally out of scope here.
+# CANCELLED (OPEN -> CANCELLED, AG-008) is creator-only and lives in
+# OrderService.cancel_order — it is not a generic FSM edge (only OPEN orders
+# can be cancelled), so it stays out of this table.
 TRANSITIONS: dict[str, dict[str, str]] = {
     "start": {"from": "ACCEPTED", "to": "BUYING", "actor": "runner"},
     "deliver": {"from": "BUYING", "to": "DELIVERED", "actor": "runner"},
@@ -155,6 +157,82 @@ class OrderService:
                 order_id=order_id,
                 lock_value=lock_value,
             )
+
+    @staticmethod
+    async def cancel_order(order_id: str, user_id: str) -> dict:
+        """Cancel an OPEN order (AG-008): OPEN -> CANCELLED.
+
+        Only the order creator may cancel, and only while the order is still
+        OPEN (no runner has claimed it). Runs under the same per-order lock as
+        accept/transition so a cancel cannot race an in-flight accept.
+
+        Ordering mirrors the FSM (status 409 before role 403): a non-creator
+        cancelling an OPEN order still gets 403, because OPEN passes the status
+        check and the creator check then fires.
+        """
+        lock_value = f"{user_id}:{uuid4().hex}"
+
+        lock_acquired = await OrderRepository.acquire_order_lock(
+            order_id=order_id,
+            lock_value=lock_value,
+        )
+
+        if not lock_acquired:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Order is being updated by another request",
+            )
+
+        try:
+            order = await OrderRepository.get_order_by_id(order_id)
+
+            if order is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Order not found",
+                )
+
+            if order["status"] != "OPEN":
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="訂單已被接單，無法取消",
+                )
+
+            if order["customer_id"] != user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Only the order creator can cancel this order",
+                )
+
+            order["status"] = "CANCELLED"
+            order["updated_at"] = datetime.now(timezone.utc)
+
+            await OrderRepository.save_order(order)
+            await OrderRepository.remove_from_open_orders(order_id)
+
+            return order
+
+        finally:
+            await OrderRepository.release_order_lock(
+                order_id=order_id,
+                lock_value=lock_value,
+            )
+
+    @staticmethod
+    async def list_my_orders(user_id: str, role: str) -> list[dict]:
+        """Return the current user's own order history (AG-010), newest first.
+
+        ``role="customer"`` lists orders they created; ``role="runner"`` lists
+        orders they accepted. Object-level authz is implicit — the index is
+        always keyed on the caller's own id, so no order belonging to another
+        user can ever be returned.
+        """
+        if role == "customer":
+            orders = await OrderRepository.list_customer_orders(user_id)
+        else:
+            orders = await OrderRepository.list_runner_orders(user_id)
+
+        return sorted(orders, key=lambda order: order["created_at"], reverse=True)
 
     @staticmethod
     async def transition(order_id: str, action: str, user_id: str) -> dict:
