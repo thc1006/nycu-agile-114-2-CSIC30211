@@ -7,7 +7,114 @@ const styles = [
   ".seg-tabs { display: flex; gap: var(--space-1); border-bottom: 1px solid var(--border-soft); margin-bottom: var(--space-6); }\n  .seg-tabs button { padding: 12px 18px; border: none; background: none; font-weight: 600; font-size: var(--text-base); color: var(--meta); position: relative; }\n  .seg-tabs button.is-active { color: var(--fg); }\n  .seg-tabs button.is-active::after { content: \"\"; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--fg); }\n  .ro { font-size: var(--text-xs); color: var(--meta); }\n  .order-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-4); }"
 ] as const
 const scripts = [
-  "var role = CampusEats.getRole();\n  document.getElementById(\"pageTitle\").textContent = role === \"runner\" ? \"我的帶單紀錄\" : \"我的訂單紀錄\";\n  document.title = (role === \"runner\" ? \"我的帶單\" : \"我的訂單\") + \" · CampusEats\";\n\n  document.querySelectorAll(\"[data-owner]\").forEach(function (el) { if (el.getAttribute(\"data-owner\") !== role) el.hidden = true; });\n\n  if (role === \"runner\") {\n    document.getElementById(\"emptyActiveTitle\").textContent = \"目前沒有接的訂單\";\n    document.getElementById(\"emptyActiveSub\").textContent = \"到接單頁看看附近的帶餐需求，接一筆順路的吧。\";\n  }\n  function refreshEmpty() {\n    var anyActive = Array.prototype.some.call(document.querySelectorAll('#paneActive [data-owner]'), function (el) { return !el.hidden; });\n    document.getElementById(\"emptyActive\").hidden = anyActive;\n  }\n  refreshEmpty();\n\n  var tabs = document.getElementById(\"tabs\");\n  var panes = { active: document.getElementById(\"paneActive\"), history: document.getElementById(\"paneHistory\") };\n  tabs.addEventListener(\"click\", function (e) {\n    var btn = e.target.closest(\"button\"); if (!btn) return;\n    tabs.querySelectorAll(\"button\").forEach(function (b) { b.classList.remove(\"is-active\"); });\n    btn.classList.add(\"is-active\");\n    Object.keys(panes).forEach(function (k) { panes[k].hidden = k !== btn.dataset.tab; });\n  });"
+  `(function () {
+    var role = CampusEats.getRole();
+    document.getElementById("pageTitle").textContent = role === "runner" ? "我的帶單紀錄" : "我的訂單紀錄";
+    document.title = (role === "runner" ? "我的帶單" : "我的訂單") + " · CampusEats";
+
+    if (role === "runner") {
+      document.getElementById("emptyActiveTitle").textContent = "目前沒有接的訂單";
+      document.getElementById("emptyActiveSub").textContent = "到接單頁看看附近的帶餐需求，接一筆順路的吧。";
+    }
+
+    var tabs = document.getElementById("tabs");
+    var panes = { active: document.getElementById("paneActive"), history: document.getElementById("paneHistory") };
+    tabs.addEventListener("click", function (e) {
+      var btn = e.target.closest("button"); if (!btn) return;
+      tabs.querySelectorAll("button").forEach(function (b) { b.classList.remove("is-active"); });
+      btn.classList.add("is-active");
+      Object.keys(panes).forEach(function (k) { panes[k].hidden = k !== btn.dataset.tab; });
+    });
+
+    var STATUS = {
+      OPEN: { text: "等待接單", cls: "badge--waiting", active: true },
+      ACCEPTED: { text: "已接單", cls: "badge--matched", active: true },
+      BUYING: { text: "購買中", cls: "badge--buying", active: true },
+      DELIVERED: { text: "已送達", cls: "badge--delivering", active: true },
+      COMPLETED: { text: "已完成", cls: "badge--done", active: false },
+      CANCELLED: { text: "已取消", cls: "badge--cancelled", active: false }
+    };
+
+    function fmtTime(value) {
+      try { return new Date(value).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }); }
+      catch (_) { return "—"; }
+    }
+
+    function clearPane(pane, emptyId) {
+      Array.from(pane.querySelectorAll(".card--link")).forEach(function (node) { node.remove(); });
+      var empty = document.getElementById(emptyId);
+      if (empty) empty.hidden = true;
+    }
+
+    function renderCard(order) {
+      var meta = STATUS[order.status] || STATUS.OPEN;
+      var a = document.createElement("a");
+      a.className = "card card--link";
+      a.href = "order-tracking.html?id=" + encodeURIComponent(order.id) + "&role=" + role;
+
+      var top = document.createElement("div");
+      top.className = "order-card__top";
+
+      var left = document.createElement("div");
+      var rest = document.createElement("div");
+      rest.className = "order-card__rest";
+      rest.textContent = order.restaurant + " · " + order.meal;
+      var ro = document.createElement("div");
+      ro.className = "ro";
+      ro.style.marginTop = "4px";
+      ro.textContent = (role === "runner" ? "我接的" : "我發布") + " · " + fmtTime(order.updated_at || order.created_at) + " · " + order.id;
+      left.appendChild(rest);
+      left.appendChild(ro);
+
+      var badge = document.createElement("span");
+      badge.className = "badge " + meta.cls;
+      badge.textContent = meta.text;
+
+      top.appendChild(left);
+      top.appendChild(badge);
+
+      var foot = document.createElement("div");
+      foot.className = "order-card__foot";
+      var m = document.createElement("span");
+      m.className = "meta";
+      m.textContent = order.pickup_location;
+      var fee = document.createElement("span");
+      fee.className = "fee";
+      fee.textContent = "$" + order.delivery_fee;
+      foot.appendChild(m);
+      foot.appendChild(fee);
+
+      a.appendChild(top);
+      a.appendChild(foot);
+      return a;
+    }
+
+    async function loadOrders() {
+      var activePane = document.getElementById("paneActive");
+      var historyPane = document.getElementById("paneHistory");
+      clearPane(activePane, "emptyActive");
+      clearPane(historyPane, "emptyHistory");
+
+      try {
+        var orders = await window.CampusEatsApi.listMyOrders(role);
+        var activeCount = 0, historyCount = 0;
+        orders.forEach(function (order) {
+          var meta = STATUS[order.status] || STATUS.OPEN;
+          if (meta.active) { activePane.insertBefore(renderCard(order), document.getElementById("emptyActive")); activeCount++; }
+          else { historyPane.insertBefore(renderCard(order), document.getElementById("emptyHistory")); historyCount++; }
+        });
+        document.getElementById("emptyActive").hidden = activeCount > 0;
+        document.getElementById("emptyHistory").hidden = historyCount > 0;
+      } catch (err) {
+        console.error("Failed to load my orders", err);
+        document.getElementById("emptyActiveTitle").textContent = "訂單紀錄載入失敗";
+        document.getElementById("emptyActiveSub").textContent = "請確認已登入，且後端 API / Redis 正常運作。";
+        document.getElementById("emptyActive").hidden = false;
+      }
+    }
+
+    loadOrders();
+  })();`
 ] as const
 
 export default function MyOrdersPage() {
@@ -37,23 +144,7 @@ export default function MyOrdersPage() {
         
             
             <div id="paneActive" className="order-grid">
-              <a className="card card--link" href="order-tracking.html?id=CE-2056" data-owner="orderer" data-od-id="active-3">
-                <div className="order-card__top"><div><div className="order-card__rest">拉亞漢堡 · 蛋餅＋奶茶</div><div className="ro" style={{ marginTop: "4px" }}>我發布 · CE-2056</div></div><span className="badge badge--delivering">配送中</span></div>
-                <div className="order-card__foot"><span className="meta">帶餐者 阿哲 · 正在送來</span><span className="fee">$23</span></div>
-              </a>
-              <a className="card card--link" href="order-tracking.html?id=CE-2048" data-owner="orderer" data-od-id="active-1">
-                <div className="order-card__top"><div><div className="order-card__rest">阿嬤的飯桶 · 招牌炸雞腿便當</div><div className="ro" style={{ marginTop: "4px" }}>我發布 · CE-2048</div></div><span className="badge badge--buying">購買中</span></div>
-                <div className="order-card__foot"><span className="meta">帶餐者 阿翔</span><span className="fee">$20</span></div>
-              </a>
-              <a className="card card--link" href="order-tracking.html?id=CE-2051" data-owner="orderer" data-od-id="active-4">
-                <div className="order-card__top"><div><div className="order-card__rest">漢堡王 · 華堡套餐</div><div className="ro" style={{ marginTop: "4px" }}>我發布 · CE-2051</div></div><span className="badge badge--matched">已接單</span></div>
-                <div className="order-card__foot"><span className="meta">帶餐者 小妤 · 準備前往購買</span><span className="fee">$26</span></div>
-              </a>
-              <a className="card card--link" href="order-tracking.html?role=runner" data-owner="runner" data-od-id="active-2">
-                <div className="order-card__top"><div><div className="order-card__rest">茶壜 · 微糖少冰珍奶 ×2</div><div className="ro" style={{ marginTop: "4px" }}>我接的 · CE-2053</div></div><span className="badge badge--matched">已接單</span></div>
-                <div className="order-card__foot"><span className="meta">訂餐者 阿哲</span><span className="fee">$35</span></div>
-              </a>
-              <div className="empty" id="emptyActive" hidden style={{ gridColumn: "1/-1" }}>
+              <div className="empty" id="emptyActive" style={{ gridColumn: "1/-1" }}>
                 <div className="empty__mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M6 4h11l3 3v13H6zM9 4v4h7" /></svg></div>
                 <h3 id="emptyActiveTitle">目前沒有進行中的訂單</h3>
                 <p id="emptyActiveSub">發一張帶餐需求，接單後就能在這裡追蹤進度。</p>
@@ -62,22 +153,11 @@ export default function MyOrdersPage() {
         
             
             <div id="paneHistory" className="order-grid" hidden>
-              <a className="card card--link" href="history-detail.html?id=CE-2039" data-owner="orderer" data-od-id="hist-1">
-                <div className="order-card__top"><div><div className="order-card__rest">拉亞漢堡 · 蛋餅＋紅茶</div><div className="ro" style={{ marginTop: "4px" }}>我發布 · 昨天 10:32 · CE-2039</div></div><span className="badge badge--done">已完成</span></div>
-                <div className="order-card__foot"><span className="meta">待評價帶餐者</span><span className="fee">$25</span></div>
-              </a>
-              <a className="card card--link" href="history-detail.html?id=CE-2018" data-owner="orderer" data-od-id="hist-3">
-                <div className="order-card__top"><div><div className="order-card__rest">小木屋鬆餅 · 培根蛋鬆餅</div><div className="ro" style={{ marginTop: "4px" }}>我發布 · 5/27 13:05 · CE-2018</div></div><span className="badge badge--cancelled">已取消</span></div>
-                <div className="order-card__foot"><span className="meta">逾時無人接單，已自動取消</span><span className="fee">$20</span></div>
-              </a>
-              <a className="card card--link" href="history-detail.html?id=CE-2031" data-owner="runner" data-od-id="hist-2">
-                <div className="order-card__top"><div><div className="order-card__rest">阿嬤的飯桶 · 三菜一肉便當</div><div className="ro" style={{ marginTop: "4px" }}>我接的 · 昨天 12:18 · CE-2031</div></div><span className="badge badge--done">已完成</span></div>
-                <div className="order-card__foot"><span className="rowflex"><span className="stars stars--static" data-stars="" data-readonly="" data-value="5" data-max="5"></span><span className="ro">你給了 5 星</span></span><span className="fee">$20</span></div>
-              </a>
-              <a className="card card--link" href="history-detail.html?id=CE-2026" data-owner="runner" data-od-id="hist-4">
-                <div className="order-card__top"><div><div className="order-card__rest">茶壜 · 半糖去冰綠茶</div><div className="ro" style={{ marginTop: "4px" }}>我接的 · 昨天 09:50 · CE-2026</div></div><span className="badge badge--done">已完成</span></div>
-                <div className="order-card__foot"><span className="meta">待評價訂餐者</span><span className="fee">$25</span></div>
-              </a>
+              <div className="empty" id="emptyHistory" style={{ gridColumn: "1/-1" }}>
+                <div className="empty__mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M6 4h11l3 3v13H6zM9 4v4h7" /></svg></div>
+                <h3>目前沒有歷史紀錄</h3>
+                <p>完成或取消的訂單會顯示在這裡。</p>
+              </div>
             </div>
           </div>
       </>

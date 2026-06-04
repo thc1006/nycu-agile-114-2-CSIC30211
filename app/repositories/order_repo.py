@@ -113,6 +113,27 @@ class OrderRepository:
 
         return orders
 
+
+    @staticmethod
+    async def list_orders_by_user(user_id: str, role: str) -> list[dict[str, Any]]:
+        redis_client = get_redis()
+
+        if role == "runner":
+            key = f"orders:by_runner:{user_id}"
+        else:
+            key = f"orders:by_customer:{user_id}"
+
+        order_ids = await redis_client.smembers(key)
+        orders: list[dict[str, Any]] = []
+
+        for order_id in order_ids:
+            order = await OrderRepository.get_order_by_id(order_id)
+            if order is not None:
+                orders.append(order)
+
+        orders.sort(key=lambda order: order["updated_at"], reverse=True)
+        return orders
+
     @staticmethod
     async def remove_from_open_orders(order_id: str) -> None:
         redis_client = get_redis()

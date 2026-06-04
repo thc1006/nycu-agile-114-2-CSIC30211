@@ -6,6 +6,7 @@ import { apiFetch, type Schemas } from './client'
 export type CreateOrderRequest = Schemas['CreateOrderRequest']
 export type OrderResponse = Schemas['OrderResponse']
 export type OpenOrderResponse = Schemas['OpenOrderResponse']
+export type MyOrdersRole = 'orderer' | 'runner'
 
 const orderPath = (orderId: string) => `/orders/${encodeURIComponent(orderId)}`
 
@@ -17,6 +18,12 @@ export function createOrder(input: CreateOrderRequest): Promise<OrderResponse> {
 /** GET /orders/open — the runner feed. */
 export function listOpenOrders(): Promise<OpenOrderResponse[]> {
   return apiFetch<OpenOrderResponse[]>('/orders/open', { auth: true })
+}
+
+
+/** GET /orders/me?role=... — orders owned by the current user or accepted by the runner. */
+export function listMyOrders(role: MyOrdersRole): Promise<OrderResponse[]> {
+  return apiFetch<OrderResponse[]>(`/orders/me?role=${encodeURIComponent(role)}`, { auth: true })
 }
 
 /** GET /orders/{id} — a single order (participant-only once accepted; see IDOR fix). */

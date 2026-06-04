@@ -104,6 +104,17 @@ class OrderService:
             for order in orders
         ]
 
+
+    @staticmethod
+    async def list_my_orders(user_id: str, role: str) -> list[dict]:
+        if role not in {"orderer", "runner"}:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="role must be either 'orderer' or 'runner'",
+            )
+
+        return await OrderRepository.list_orders_by_user(user_id, role)
+
     @staticmethod
     async def accept_order(order_id: str, runner_id: str) -> dict:
         lock_value = f"{runner_id}:{uuid4().hex}"

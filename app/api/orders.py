@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.schemas.order import (
     CreateOrderRequest,
@@ -46,6 +46,18 @@ async def list_open_orders(
     current_user: dict = Depends(get_current_user),
 ):
     return await OrderService.list_open_orders()
+
+
+
+@router.get(
+    "/me",
+    response_model=list[OrderResponse],
+)
+async def list_my_orders(
+    role: str = Query("orderer", pattern="^(orderer|runner)$"),
+    current_user: dict = Depends(get_current_user),
+):
+    return await OrderService.list_my_orders(current_user["id"], role)
 
 
 @router.get(
