@@ -10,14 +10,11 @@ import { test, expect } from '@playwright/test'
 // into the two transitions an orderer can actually drive solo: create→track, and
 // the post-completion rating submit. Both are asserted below.
 
-// MOCK-STAGE (#14): this journey runs entirely against hardcoded data in
-// src/legacy/campus-web.js — the tracking screen renders a static fixture rather
-// than the order just created, and the fee check is only `toContainText('$')`, so
-// the create→track data link can break while this stays green (false-green risk).
-// When #12 lands: assert the tracked order reflects the CREATED order's id/items,
-// strengthen the fee assertion to the exact computed amount, and add API
-// 4xx/5xx/timeout paths. Add a "break test" (gut the create handler → this must go
-// red) to prove it actually exercises the journey.
+// PARTIAL-WIRE: order tracking is now wired to the real API (OrderTracking.tsx),
+// but the post-order page is still mock and does NOT create a real order, so the
+// confirm → tracking hop lands on tracking's self-contained empty state (no real
+// id in the URL). The real getOrder + live timeline + FSM actions are covered in
+// order-tracking.spec.ts. The post-order create flow itself remains mock.
 test.describe('orderer lifecycle', () => {
   test('creates an order and lands on live tracking', async ({ page }) => {
     await page.goto('/post-order?role=orderer')
@@ -38,12 +35,10 @@ test.describe('orderer lifecycle', () => {
     await page.getByRole('button', { name: '查看訂單進度' }).click()
     await expect(page).toHaveURL(/order-tracking/)
 
-    // Tracking renders the live order: heading, partner, computed fee, and the
-    // orderer-facing status note.
+    // Wired tracking with no real id (mock post-order) → self-contained empty
+    // state. The live timeline + status actions are covered by order-tracking.spec.ts.
     await expect(page.getByRole('heading', { name: '即時進度' })).toBeVisible()
-    await expect(page.locator('#partnerName')).toContainText('帶餐者')
-    await expect(page.locator('#tkFee')).toContainText('$')
-    await expect(page.locator('#ctxNote')).not.toBeEmpty()
+    await expect(page.getByRole('button', { name: /建立示範訂單/ })).toBeVisible()
   })
 
   test('submits a star rating and sees the completion state', async ({ page }) => {

@@ -4,23 +4,25 @@ kind: Kustomization
 namespace: campuseats
 
 resources:
-  - namespace.yaml
-  - redis/statefulset.yaml
-  - redis/service.yaml
-  - backend/configmap.yaml
-  - backend/deployment.yaml
-  - backend/service.yaml
-  - backend/hpa.yaml
-  - frontend/deployment.yaml
-  - frontend/service.yaml
-  - ingress.yaml
+- namespace.yaml
+- redis/statefulset.yaml
+- redis/service.yaml
+- backend/configmap.yaml
+- backend/deployment.yaml
+- backend/service.yaml
+- backend/hpa.yaml
+- frontend/deployment.yaml
+- frontend/service.yaml
+- ingress.yaml
   # NOTE: backend-secret is intentionally NOT listed — apply your real
   # secret.yaml (from secret.example.yaml) out-of-band so it never lands in git.
 
 # Centralized image pins. The build-images CI workflow rewrites the `newTag`
 # fields below to the latest git sha after pushing to GHCR.
 images:
-  - name: ghcr.io/thc1006/campuseats-backend
-    newTag: latest
-  - name: ghcr.io/thc1006/campuseats-frontend
-    newTag: latest
+- name: ghcr.io/thc1006/campuseats-backend
+  newName: ghcr.io/thc1006/campuseats-backend
+  newTag: sha-d1faa88883c5
+- name: ghcr.io/thc1006/campuseats-frontend
+  newName: ghcr.io/thc1006/campuseats-frontend
+  newTag: sha-d1faa88883c5

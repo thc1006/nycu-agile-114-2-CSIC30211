@@ -1,12 +1,21 @@
 import { test, expect } from '@playwright/test'
 
 // End-to-end runner journey: login (runner) → feed → filter → accept an order →
-// order tracking. Data is mocked in the legacy runtime pending the backend.
+// order tracking. Login performs a REAL auth call (#12 wiring), stubbed at the
+// network layer; the feed/detail data is still mocked in the legacy runtime.
 test.describe('runner journey', () => {
   test('logs in as a runner and reaches the order feed', async ({ page }) => {
+    await page.route((url) => url.pathname.endsWith('/auth/login'), (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ access_token: 'e2e-token', token_type: 'bearer' }),
+      }),
+    )
     await page.goto('/login?role=runner')
+    await page.getByLabel('學校 Email').fill('runner@campus.edu')
     await page.getByLabel('密碼').fill('demo-password')
-    await page.getByRole('button', { name: '繼續' }).click()
+    await page.getByRole('button', { name: '登入', exact: true }).click()
 
     await expect(page).toHaveURL(/\/feed/)
     await expect(page.getByRole('heading', { name: '待接訂單' })).toBeVisible()
