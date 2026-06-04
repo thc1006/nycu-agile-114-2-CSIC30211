@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures'
 
 // Regression for the mobile phone bottom-nav. Below the desktop breakpoint the
 // bottom tab-bar (mounted by the legacy runtime on <body>) is the only primary
