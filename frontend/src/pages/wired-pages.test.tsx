@@ -117,8 +117,10 @@ describe('Feed (runner)', () => {
 
 describe('OrderDetail (runner)', () => {
   it('loads the order and accepts it', async () => {
-    h.getOrder.mockResolvedValue(fullOrder({ status: 'OPEN' }))
-    h.acceptOrder.mockResolvedValue(fullOrder({ status: 'ACCEPTED' }))
+    // The mocked user (u_buyer) is the runner here, so the order is someone
+    // else's (u_other) — otherwise the orderer-owns-it branch would fire.
+    h.getOrder.mockResolvedValue(fullOrder({ status: 'OPEN', customer_id: 'u_other' }))
+    h.acceptOrder.mockResolvedValue(fullOrder({ status: 'ACCEPTED', customer_id: 'u_other' }))
     renderAt(<OrderDetail />, '/order-detail?id=o_1&role=runner')
 
     const accept = await screen.findByRole('button', { name: /接下這筆訂單/ })
@@ -130,6 +132,13 @@ describe('OrderDetail (runner)', () => {
   it('shows a not-found message without an id', async () => {
     renderAt(<OrderDetail />, '/order-detail?role=runner')
     expect(await screen.findByText(/找不到訂單/)).toBeInTheDocument()
+  })
+
+  it('routes an orderer who lands on their own order to tracking', async () => {
+    // u_buyer is the order creator → no accept/「已被接單」dead-end; offer tracking.
+    h.getOrder.mockResolvedValue(fullOrder({ status: 'ACCEPTED', customer_id: 'u_buyer' }))
+    renderAt(<OrderDetail />, '/order-detail?id=o_1&role=orderer')
+    expect(await screen.findByText(/前往訂單追蹤/)).toBeInTheDocument()
   })
 })
 
@@ -259,7 +268,8 @@ describe('error and edge branches', () => {
   })
 
   it('OrderDetail shows the "already yours" branch for a non-open order you hold', async () => {
-    h.getOrder.mockResolvedValue(fullOrder({ status: 'ACCEPTED', runner_id: 'u_buyer' }))
+    // u_buyer is the runner on someone else's (u_other) order.
+    h.getOrder.mockResolvedValue(fullOrder({ status: 'ACCEPTED', customer_id: 'u_other', runner_id: 'u_buyer' }))
     renderAt(<OrderDetail />, '/order-detail?id=o_1&role=runner')
     expect(await screen.findByText(/前往配送流程/)).toBeInTheDocument()
   })

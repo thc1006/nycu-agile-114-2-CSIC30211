@@ -112,6 +112,7 @@ export default function OrderDetail() {
 
   const isOpen = order.status === 'OPEN'
   const isMine = Boolean(user && order.runner_id === user.id)
+  const isOwner = Boolean(user && order.customer_id === user.id)
 
   return (
     <div className="detail-grid">
@@ -156,7 +157,17 @@ export default function OrderDetail() {
             </p>
           )}
 
-          {isOpen ? (
+          {isOwner ? (
+            <>
+              <p className="lockmsg">這是你發布的訂單 · 目前狀態:{statusLabel(order.status)}</p>
+              <a
+                className="btn btn-black btn--block btn--lg"
+                href={`order-tracking.html?id=${encodeURIComponent(order.id)}&role=orderer`}
+              >
+                前往訂單追蹤
+              </a>
+            </>
+          ) : isOpen ? (
             <>
               <p className="lockmsg" id="lockNote">
                 <svg viewBox="0 0 24 24">

@@ -77,10 +77,11 @@ export default function MyOrders() {
   }, [apiRole])
 
   useEffect(() => {
+    if (loading) return
     void refresh()
     const timer = setInterval(() => void refresh(), POLL_MS)
     return () => clearInterval(timer)
-  }, [refresh])
+  }, [loading, refresh])
 
   const visible = useMemo(() => {
     if (filter === 'active') return orders.filter((o) => ACTIVE_STATUSES.includes(o.status))
