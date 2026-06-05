@@ -4,6 +4,10 @@ import os
 os.environ["REDIS_DB"] = "15"
 # A >=32-byte, non-placeholder secret so config validation passes under test.
 os.environ["JWT_SECRET_KEY"] = "test-secret-key-for-ci-0123456789abcdef"
+# Hash passwords at the bcrypt minimum in tests. Production cost (12) adds
+# ~200ms/hash; across the hundreds of register/login calls in the suite that
+# alone was ~50s. Cost 4 is ~40x faster and does not change behaviour under test.
+os.environ.setdefault("BCRYPT_ROUNDS", "4")
 
 import pytest
 import redis

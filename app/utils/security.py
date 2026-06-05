@@ -11,6 +11,10 @@ from app.config import settings
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto",
+    # Cost is configurable so tests can drop to the bcrypt minimum (see
+    # Settings.BCRYPT_ROUNDS). Hashes are self-describing, so lowering the cost
+    # never affects verifying existing higher-cost hashes.
+    bcrypt__rounds=settings.BCRYPT_ROUNDS,
 )
 
 

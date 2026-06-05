@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
 
+    # bcrypt work factor for password hashing. 12 is a sensible production cost
+    # (~200ms/hash) but is deliberately expensive, which dominates the test suite
+    # (hundreds of register/login hashes). Tests override this to the bcrypt
+    # minimum (4) via the BCRYPT_ROUNDS env var — see tests/conftest.py.
+    BCRYPT_ROUNDS: int = 12
+
     # Comma-separated list of browser origins allowed to call the API (CORS).
     # Defaults cover the Vite dev server (5173) and the preview/build server (4173)
     # used by the frontend E2E. Override via the CORS_ORIGINS env var in prod (#12).
