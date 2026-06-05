@@ -1,4 +1,5 @@
 const PAGE_IDS = [
+  'about',
   'dashboard',
   'feed',
   'history-detail',

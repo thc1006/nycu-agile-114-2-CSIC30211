@@ -260,11 +260,11 @@ CampusEats MVP 的主流程如下：
 | AG-009 | Email 或站內通知 | P2 | A5 狀態更新 | 狀態變更時提醒使用者 |
 | AG-010 | 歷史訂單紀錄 | P2 | A6 完成交易 | 使用者可查看過去訂單 |
 | AG-011 | UI / Bug Fix | P0 | 全流程 | 修正 Sprint Review 發現問題 |
-| AG-012 | Demo Seed Data | P0 | 展示準備 | 建立展示用測試帳號與訂單資料 |
+| AG-012 | Demo Seed Data | ~~P0~~ | 展示準備 | **已移除(descoped)**:改為使用者自行以 Email 註冊,不再預置測試帳號 / 種子資料 |
 
 ### Sprint 4 Demo Flow
 
-1. 使用測試帳號登入
+1. 註冊並登入新帳號(以訂餐者、帶餐者兩個帳號分別示範)
 2. 完整跑一筆交易流程
 3. 展示取消待接訂單
 4. 展示完成訂單與評價
@@ -293,20 +293,22 @@ CampusEats MVP 的主流程如下：
 
 ## 12. Product Backlog 對應表
 
+> 狀態以 v1.0.0 (MVP) 完成後更新;權威狀態以 [`backlog.md`](backlog.md) 為準。
+
 | ID | Story | Priority | Sprint | 狀態 |
 |---|---|---|---|---|
-| AG-001 | Email 註冊與登入 | P0 | Sprint 1 | Todo |
-| AG-002 | 發布訂單 | P0 | Sprint 1 | Todo |
-| AG-003 | 瀏覽待接訂單列表 | P0 | Sprint 1 | Todo |
-| AG-004 | 接單 | P0 | Sprint 2 | Todo |
-| AG-005 | 更新訂單狀態 | P0 | Sprint 2–3 | Todo |
-| AG-006 | 確認收餐 | P0 | Sprint 3 | Todo |
-| AG-007 | 雙向評價 | P1 | Sprint 3 | Todo |
-| AG-008 | 取消訂單 | P1 | Sprint 4 | Todo |
-| AG-009 | Email / 站內通知 | P2 | Sprint 4 | Optional |
-| AG-010 | 歷史訂單紀錄 | P2 | Sprint 4 | Optional |
-| AG-011 | UI / Bug Fix | P0 | Sprint 4 | Todo |
-| AG-012 | Demo Seed Data | P0 | Sprint 4 | Todo |
+| AG-001 | Email 註冊與登入 | P0 | Sprint 1 | Done |
+| AG-002 | 發布訂單 | P0 | Sprint 1 | Done |
+| AG-003 | 瀏覽待接訂單列表 | P0 | Sprint 1 | Done |
+| AG-004 | 接單 | P0 | Sprint 2 | Done |
+| AG-005 | 更新訂單狀態 | P0 | Sprint 2–3 | Done |
+| AG-006 | 確認收餐 | P0 | Sprint 3 | Done |
+| AG-007 | 雙向評價 | P1 | Sprint 3 | Done |
+| AG-008 | 取消訂單 | P1 | Sprint 4 | Done |
+| AG-009 | Email / 站內通知 | P2 | Sprint 4 | Deferred(以輪詢替代) |
+| AG-010 | 歷史訂單紀錄 | P2 | Sprint 4 | Done |
+| AG-011 | UI / Bug Fix | P0 | Sprint 4 | Done |
+| AG-012 | Demo Seed Data | ~~P0~~ | Sprint 4 | 移除(descoped) |
 
 ---
 
