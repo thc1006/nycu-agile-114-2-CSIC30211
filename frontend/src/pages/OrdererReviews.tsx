@@ -37,7 +37,7 @@ export default function OrdererReviews() {
         if (alive) setRating(r)
       })
       .catch((err) => {
-        if (alive) setError(friendly(err, '載入評分失敗,請稍後再試'))
+        if (alive) setError(friendly(err, '載入評分失敗，請稍後再試'))
       })
     return () => {
       alive = false
@@ -80,7 +80,7 @@ export default function OrdererReviews() {
           <p className="sec-label">評價明細</p>
           <div className="card">
             <p className="body-sm muted" style={{ margin: '0' }}>
-              目前顯示總體評分,單筆評價明細尚未開放。
+              目前顯示總體評分，單筆評價明細尚未開放。
             </p>
           </div>
         </section>

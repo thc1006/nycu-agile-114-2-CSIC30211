@@ -38,7 +38,7 @@ export default function Feed() {
       setOrders([...open].sort(byExpectedTime))
       setError('')
     } catch (err) {
-      setError(friendly(err, '載入待接訂單失敗,請稍後再試'))
+      setError(friendly(err, '載入待接訂單失敗，請稍後再試'))
     }
   }, [])
 
@@ -77,7 +77,7 @@ export default function Feed() {
                 </svg>
               </div>
               <h3>目前沒有可接訂單</h3>
-              <p>稍後再回來看看。尖峰時段(11:30–13:00)通常最多單。</p>
+              <p>稍後再回來看看。尖峰時段（11:30–13:00）通常最多單。</p>
             </div>
           ) : (
             <div className="order-grid">

@@ -86,7 +86,7 @@ export default function PostOrder() {
       })
       navigate(`/order-tracking?id=${encodeURIComponent(created.id)}&role=orderer`)
     } catch (err) {
-      setError(friendly(err, '發布訂單失敗,請稍後再試'))
+      setError(friendly(err, '發布訂單失敗，請稍後再試'))
       setBusy(false)
     }
   }
@@ -99,7 +99,7 @@ export default function PostOrder() {
         <p className="crumb">發布帶餐需求</p>
         <h1>發布帶餐需求</h1>
         <p>
-          標 <span style={{ color: 'var(--danger)' }}>*</span> 為必填。資訊越清楚,順路的同學越敢接單。
+          標 <span style={{ color: 'var(--danger)' }}>*</span> 為必填。資訊越清楚，順路的同學越敢接單。
         </p>
       </div>
 
@@ -142,7 +142,7 @@ export default function PostOrder() {
               value={meal}
               onChange={(e) => setMeal(e.target.value)}
             />
-            <span className="hint">寫清楚品項、數量與客製(辣度、冰塊、加料),避免買錯。</span>
+            <span className="hint">寫清楚品項、數量與客製（辣度、冰塊、加料），避免買錯。</span>
           </div>
 
           <div className="grid-2">
@@ -230,7 +230,7 @@ export default function PostOrder() {
                 </div>
               </div>
               <p className="fee-note">
-                校園統一費率,訂餐者無法自訂——和 Uber Eats 一樣由系統計算,確保價格透明、帶餐者收入公平。
+                校園統一費率，訂餐者無法自訂——和 Uber Eats 一樣由系統計算，確保價格透明、帶餐者收入公平。
               </p>
             </div>
             <button className="btn btn-black btn--block btn--lg" type="submit" disabled={busy}>

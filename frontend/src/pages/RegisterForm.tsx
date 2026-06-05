@@ -24,7 +24,7 @@ export default function RegisterForm() {
     if (submitting) return // re-entrancy guard: Enter fires submit even while the button is disabled
     setError('')
     if (!canSubmit) {
-      setError('請填寫姓名、有效的學校 Email,密碼至少 6 碼')
+      setError('請填寫姓名、有效的學校 Email，密碼至少 6 碼')
       return
     }
     setSubmitting(true)
@@ -34,7 +34,7 @@ export default function RegisterForm() {
     } catch (err) {
       // status 0 = transport failure (network/CORS) with an internal sentinel
       // detail; show the localized fallback, surface only real backend messages.
-      setError(err instanceof ApiError && err.status !== 0 ? err.detail : '註冊失敗,請稍後再試')
+      setError(err instanceof ApiError && err.status !== 0 ? err.detail : '註冊失敗，請稍後再試')
     } finally {
       setSubmitting(false)
     }

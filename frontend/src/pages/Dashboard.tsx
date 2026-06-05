@@ -59,7 +59,7 @@ export default function Dashboard() {
       setOrders(mine.filter((o) => ACTIVE_STATUSES.includes(o.status)))
       setError('')
     } catch (err) {
-      setError(friendly(err, '載入訂單失敗,請稍後再試'))
+      setError(friendly(err, '載入訂單失敗，請稍後再試'))
     } finally {
       setLoaded(true)
     }
@@ -96,7 +96,7 @@ export default function Dashboard() {
       await cancelOrder(id)
       await refresh()
     } catch (err) {
-      setError(friendly(err, '取消訂單失敗,請稍後再試'))
+      setError(friendly(err, '取消訂單失敗，請稍後再試'))
     } finally {
       setBusyId(null)
     }
@@ -109,7 +109,7 @@ export default function Dashboard() {
   return (
     <>
       <div className="page__head">
-        <h1>嗨,{name} 👋 今天想找人帶什麼?</h1>
+        <h1>嗨，{name} 👋 今天想找人帶什麼？</h1>
       </div>
 
       <div className="split split--wide-aside">
@@ -182,11 +182,11 @@ export default function Dashboard() {
           <div className="hero-action" data-od-id="orderer-cta">
             <div>
               <h2>
-                沒空買飯?
+                沒空買飯？
                 <br />
                 發一張帶餐需求
               </h2>
-              <p>填好餐廳、餐點、取餐地點與時間,順路的同學就能接單。帶餐費由系統依份量與時段自動計算。</p>
+              <p>填好餐廳、餐點、取餐地點與時間，順路的同學就能接單。帶餐費由系統依份量與時段自動計算。</p>
             </div>
             <a className="btn btn-white" href="post-order.html?role=orderer">
               ＋ 發布帶餐需求

@@ -52,7 +52,7 @@ export default function OrderDetail() {
       setOrder(await getOrder(id))
       setError('')
     } catch (err) {
-      setError(friendly(err, '載入訂單失敗,請稍後再試'))
+      setError(friendly(err, '載入訂單失敗，請稍後再試'))
     }
   }, [id])
 
@@ -69,7 +69,7 @@ export default function OrderDetail() {
       await acceptOrder(id)
       navigate(`/order-tracking?id=${encodeURIComponent(id)}&role=runner`)
     } catch (err) {
-      setError(friendly(err, '接單失敗,請稍後再試'))
+      setError(friendly(err, '接單失敗，請稍後再試'))
       setBusy(false)
       void refresh()
     }
@@ -82,7 +82,7 @@ export default function OrderDetail() {
     return (
       <section className="stack-5" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
         <h1>找不到訂單</h1>
-        <p className="muted">缺少訂單編號,無法顯示詳情。</p>
+        <p className="muted">缺少訂單編號，無法顯示詳情。</p>
         <p>
           <a className="btn btn-black btn--lg" href="feed.html?role=runner">
             回到待接訂單
@@ -159,7 +159,7 @@ export default function OrderDetail() {
 
           {isOwner ? (
             <>
-              <p className="lockmsg">這是你發布的訂單 · 目前狀態:{statusLabel(order.status)}</p>
+              <p className="lockmsg">這是你發布的訂單 · 目前狀態：{statusLabel(order.status)}</p>
               <a
                 className="btn btn-black btn--block btn--lg"
                 href={`order-tracking.html?id=${encodeURIComponent(order.id)}&role=orderer`}
@@ -174,7 +174,7 @@ export default function OrderDetail() {
                   <rect x="5" y="11" width="14" height="9" rx="2" />
                   <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                 </svg>
-                接單後立即鎖定,其他人無法重複接
+                接單後立即鎖定，其他人無法重複接
               </p>
               <button
                 type="button"
@@ -187,14 +187,14 @@ export default function OrderDetail() {
             </>
           ) : isMine ? (
             <>
-              <p className="lockmsg">這筆訂單已是你的 · 目前狀態:{statusLabel(order.status)}</p>
+              <p className="lockmsg">這筆訂單已是你的 · 目前狀態：{statusLabel(order.status)}</p>
               <a className="btn btn-black btn--block btn--lg" href={`order-tracking.html?id=${encodeURIComponent(order.id)}&role=runner`}>
                 前往配送流程
               </a>
             </>
           ) : (
             <>
-              <p className="lockmsg">這筆訂單已被接單 · 目前狀態:{statusLabel(order.status)}</p>
+              <p className="lockmsg">這筆訂單已被接單 · 目前狀態：{statusLabel(order.status)}</p>
               <a className="btn btn-black btn--block btn--lg" href="feed.html?role=runner">
                 回到待接訂單
               </a>
