@@ -34,7 +34,7 @@ export default function LandingPage() {
           <section className="hero" data-od-id="hero">
             <div className="wrap hero__inner">
               <div>
-                <h1>沒空買飯，<br />就交給順路的<span style={{ whiteSpace: "nowrap" }}>同學。</span></h1>
+                <h1>沒空買飯，<br />就交給順路的<span style={{ whiteSpace: "nowrap" }}>同學</span></h1>
                 <p className="lead">CampusEats 把校園裡分散在群組的「幫忙帶餐」需求集中起來：清楚發單、即時接單、全程狀態追蹤、雙向評價。學生幫學生的互助帶餐。</p>
                 <div className="hero__cta">
                   <a className="btn btn-black btn--lg" href="register.html">開始使用</a>

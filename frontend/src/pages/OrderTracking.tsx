@@ -53,7 +53,7 @@ export default function OrderTracking() {
     try {
       setOrder(await getOrder(id))
     } catch (err) {
-      setError(friendly(err, '載入訂單失敗,請稍後再試'))
+      setError(friendly(err, '載入訂單失敗，請稍後再試'))
     }
   }, [id])
 
@@ -72,7 +72,7 @@ export default function OrderTracking() {
     try {
       setOrder(await fn(id))
     } catch (err) {
-      setError(friendly(err, '操作失敗,請稍後再試'))
+      setError(friendly(err, '操作失敗，請稍後再試'))
     } finally {
       setBusy(false)
     }
@@ -92,7 +92,7 @@ export default function OrderTracking() {
       })
       navigate(`/order-tracking?id=${encodeURIComponent(created.id)}&role=${role}`)
     } catch (err) {
-      setError(friendly(err, '建立示範訂單失敗,請先登入再試'))
+      setError(friendly(err, '建立示範訂單失敗，請先登入再試'))
     } finally {
       setBusy(false)
     }
@@ -104,7 +104,7 @@ export default function OrderTracking() {
       <section className="track-empty">
         <h1>即時進度</h1>
         <p className="track-empty__lead">
-          目前沒有追蹤中的訂單。建立一筆示範訂單,即可看到狀態隨按鈕即時更新(每幾秒自動刷新)。
+          目前沒有追蹤中的訂單。建立一筆示範訂單，即可看到狀態隨按鈕即時更新（每幾秒自動刷新）。
         </p>
         {error && <p role="alert" className="form-error">{error}</p>}
         <button type="button" className="btn btn-black btn--lg" onClick={createDemoOrder} disabled={busy}>
@@ -192,7 +192,7 @@ function renderAction(
     if (status === 'OPEN') return btn('接單', acceptOrder)
     if (status === 'ACCEPTED') return btn('開始購買', startOrder)
     if (status === 'BUYING') return btn('標記已送達', deliverOrder)
-    if (status === 'DELIVERED') return <p className="ctx">已送達,等待訂餐者確認收餐…</p>
+    if (status === 'DELIVERED') return <p className="ctx">已送達，等待訂餐者確認收餐…</p>
     if (status === 'COMPLETED') return rateLink
     return null
   }
@@ -202,12 +202,12 @@ function renderAction(
     // Only an as-yet-unaccepted order can be withdrawn (AG-008).
     return (
       <>
-        <p className="ctx">尚未有帶餐者接單,你仍可取消這筆需求。</p>
+        <p className="ctx">尚未有帶餐者接單，你仍可取消這筆需求。</p>
         {btn('取消訂單', cancelOrder)}
       </>
     )
   }
   if (status === 'DELIVERED') return btn('確認收餐', confirmOrder)
   if (status === 'COMPLETED') return rateLink
-  return <p className="ctx">帶餐者處理中,狀態會自動更新,不用一直私訊問進度。</p>
+  return <p className="ctx">帶餐者處理中，狀態會自動更新，不用一直私訊問進度。</p>
 }

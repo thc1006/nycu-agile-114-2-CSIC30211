@@ -52,7 +52,7 @@ export default function AboutPage() {
             <section aria-labelledby="about-loop">
               <h2 id="about-loop">怎麼運作</h2>
               <p className="muted" style={{ marginBottom: 'var(--space-3)' }}>
-                {APP_TAGLINE}。一筆訂單從發出到完成,會走過這條閉環:
+                {APP_TAGLINE}。一筆訂單從發出到完成，會走過這條閉環：
               </p>
               <div className="about__loop" aria-hidden="true">
                 <span>註冊 / 登入</span>
@@ -72,25 +72,25 @@ export default function AboutPage() {
                 <div className="card">
                   <div className="role-k">Orderer</div>
                   <h3>訂餐者</h3>
-                  <p>發出帶餐需求、設定取餐地點與時間,追蹤狀態並在收到後確認、評價。</p>
+                  <p>發出帶餐需求、設定取餐地點與時間，追蹤狀態並在收到後確認、評價。</p>
                 </div>
                 <div className="card">
                   <div className="role-k">Runner</div>
                   <h3>帶餐者</h3>
-                  <p>瀏覽附近順路的待接訂單,接單後更新「購買中 / 已送達」,完成後賺取帶餐費。</p>
+                  <p>瀏覽附近順路的待接訂單，接單後更新「購買中 / 已送達」，完成後賺取帶餐費。</p>
                 </div>
               </div>
               <p className="muted" style={{ marginTop: 'var(--space-3)', fontSize: 'var(--text-sm)' }}>
-                身份是每次登入時選擇的「使用模式」,不是綁定帳號的屬性 —— 同一個帳號兩種身份都能用。
+                身份是每次登入時選擇的「使用模式」，不是綁定帳號的屬性 —— 同一個帳號兩種身份都能用。
               </p>
             </section>
 
             <section aria-labelledby="about-tech">
               <h2 id="about-tech">技術架構</h2>
               <p className="muted" style={{ fontSize: 'var(--text-sm)' }}>
-                前端 React + Vite + TypeScript(react-router 單頁應用);後端 FastAPI + Redis,JWT
-                驗證、訂單狀態機與每筆訂單的接單鎖;跨角色狀態以輪詢(4–5 秒)近即時同步。整套以
-                Docker 容器化,部署於 Kubernetes(campuseat.hsuan.app)。
+                前端 React + Vite + TypeScript（react-router 單頁應用）；後端 FastAPI + Redis，JWT
+                驗證、訂單狀態機與每筆訂單的接單鎖；跨角色狀態以輪詢（4–5 秒）近即時同步。整套以
+                Docker 容器化，部署於 Kubernetes（campuseat.hsuan.app）。
               </p>
             </section>
 

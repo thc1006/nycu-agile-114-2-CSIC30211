@@ -44,7 +44,7 @@ export default function RunnerEarnings() {
         if (alive) setOrders(list)
       })
       .catch((err) => {
-        if (alive) setError(friendly(err, '載入收入失敗,請稍後再試'))
+        if (alive) setError(friendly(err, '載入收入失敗，請稍後再試'))
       })
       .finally(() => {
         if (alive) setLoaded(true)

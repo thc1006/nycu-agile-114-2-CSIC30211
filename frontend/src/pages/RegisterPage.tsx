@@ -27,7 +27,7 @@ export default function RegisterPage() {
               <div className="auth-box__head">
                 <p className="eyebrow" style={{ justifyContent: "center" }}>開始使用 · 建立帳號</p>
                 <h1>建立你的 CampusEats 帳號</h1>
-                <p>用學校 Email 註冊即可開始使用。系統不會寄驗證信,密碼至少 6 碼。身份(訂餐者 / 帶餐者)於每次登入時選擇,兩種視角共用同一個帳號。</p>
+                <p>用學校 Email 註冊即可開始使用。系統不會寄驗證信，密碼至少 6 碼。身份（訂餐者 / 帶餐者）於每次登入時選擇，兩種視角共用同一個帳號。</p>
               </div>
 
               <div className="auth-card">
@@ -35,7 +35,7 @@ export default function RegisterPage() {
               </div>
 
               <p className="auth-note">註冊完成後會引導你前往登入。</p>
-              <p className="auth-foot"><a href="login.html">已有帳號,前往登入</a></p>
+              <p className="auth-foot"><a href="login.html">已有帳號，前往登入</a></p>
             </div>
           </main>
       </>

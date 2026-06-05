@@ -70,7 +70,7 @@ export default function MyOrders() {
       setOrders(await listMyOrders(apiRole))
       setError('')
     } catch (err) {
-      setError(friendly(err, '載入訂單失敗,請稍後再試'))
+      setError(friendly(err, '載入訂單失敗，請稍後再試'))
     } finally {
       setLoaded(true)
     }
@@ -91,7 +91,7 @@ export default function MyOrders() {
 
   const heading = role === 'runner' ? '我的帶單' : '我的訂單'
   const ownerLabel = role === 'runner' ? '我接的' : '我發布'
-  const emptyText = role === 'runner' ? '還沒有接單,去看看待接列表' : '還沒有訂單,去發一張吧'
+  const emptyText = role === 'runner' ? '還沒有接單，去看看待接列表' : '還沒有訂單，去發一張吧'
 
   if (loading) return <p className="mo-loading">載入中…</p>
 

@@ -53,7 +53,7 @@ export default function Rating() {
         if (alive) setOrder(o)
       })
       .catch((err) => {
-        if (alive) setLoadError(friendly(err, '載入訂單失敗,請稍後再試'))
+        if (alive) setLoadError(friendly(err, '載入訂單失敗，請稍後再試'))
       })
     return () => {
       alive = false
@@ -73,7 +73,7 @@ export default function Rating() {
         // backend's own message, which distinguishes the two cases.
         setError(/already/i.test(err.detail) ? '你已經評價過這筆訂單' : '訂單完成後才能評價')
       } else {
-        setError(friendly(err, '送出評價失敗,請稍後再試'))
+        setError(friendly(err, '送出評價失敗，請稍後再試'))
       }
       setBusy(false)
     }
@@ -118,7 +118,7 @@ export default function Rating() {
           <p className="muted">
             {stars} 星 · {STAR_LABELS[stars]}
           </p>
-          <p className="muted">評價送出後即無法修改,謝謝你讓校園帶餐更值得信任。</p>
+          <p className="muted">評價送出後即無法修改，謝謝你讓校園帶餐更值得信任。</p>
           <div
             className="stack-3"
             style={{ maxWidth: '360px', marginInline: 'auto', marginTop: 'var(--space-4)' }}
