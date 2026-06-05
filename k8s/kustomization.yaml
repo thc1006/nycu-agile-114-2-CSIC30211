@@ -23,7 +23,7 @@ resources:
 images:
 - name: ghcr.io/thc1006/campuseats-backend
   newName: ghcr.io/thc1006/campuseats-backend
-  newTag: sha-6e87312cb716
+  newTag: sha-b2f873588bcc
 - name: ghcr.io/thc1006/campuseats-frontend
   newName: ghcr.io/thc1006/campuseats-frontend
-  newTag: sha-6e87312cb716
+  newTag: sha-b2f873588bcc
