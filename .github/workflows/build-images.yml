@@ -52,7 +52,7 @@ jobs:
 
       - name: Backend metadata
         id: meta-backend
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.BACKEND_IMAGE }}
           tags: |
@@ -73,7 +73,7 @@ jobs:
 
       - name: Frontend metadata
         id: meta-frontend
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.FRONTEND_IMAGE }}
           tags: |
